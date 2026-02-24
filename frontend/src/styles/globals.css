@@ -1,0 +1,217 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  * {
+    box-sizing: border-box;
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    @apply bg-ink-950 text-white font-body;
+    background-color: #09090f;
+    color: white;
+    font-feature-settings: "rlig" 1, "calt" 1;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+
+  ::-webkit-scrollbar-track {
+    @apply bg-ink-900;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    @apply bg-ink-600 rounded-full;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    @apply bg-ember-400;
+  }
+
+  ::selection {
+    @apply bg-ember-500/30 text-white;
+  }
+}
+
+@layer components {
+  .glass {
+    @apply bg-ink-800/60 backdrop-blur-xl border border-white/5;
+  }
+
+  .glass-hover {
+    @apply hover:bg-ink-700/60 hover:border-white/10 transition-all duration-200;
+  }
+
+  .btn-primary {
+    @apply bg-ember-500 hover:bg-ember-400 text-white font-display font-semibold px-6 py-3 rounded-xl transition-all duration-200 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed disabled:active:scale-100;
+  }
+
+  .btn-secondary {
+    @apply glass glass-hover text-white/80 hover:text-white font-body px-5 py-2.5 rounded-xl transition-all duration-200 active:scale-95;
+  }
+
+  .input-field {
+    @apply glass w-full px-4 py-3 rounded-xl text-white placeholder-white/30 font-body text-sm focus:outline-none focus:ring-1 focus:ring-ember-500/50 focus:border-ember-500/30 transition-all duration-200;
+  }
+
+  .tag {
+    @apply inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-body font-medium;
+  }
+
+  .gradient-text {
+    @apply bg-gradient-to-r from-ember-400 to-frost-400 bg-clip-text text-transparent;
+  }
+
+  .noise-bg {
+    position: relative;
+  }
+
+  .noise-bg::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.04'/%3E%3C/svg%3E");
+    border-radius: inherit;
+    pointer-events: none;
+  }
+
+  .shimmer-loading {
+    background: linear-gradient(90deg,
+        theme('colors.ink.800') 25%,
+        theme('colors.ink.700') 50%,
+        theme('colors.ink.800') 75%);
+    background-size: 200% 100%;
+    animation: shimmer 1.5s infinite;
+  }
+}
+
+/* Typing cursor animation */
+@keyframes blink {
+
+  0%,
+  100% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: 0;
+  }
+}
+
+.typing-cursor::after {
+  content: '▋';
+  @apply text-ember-400;
+  animation: blink 0.8s step-end infinite;
+  margin-left: 2px;
+}
+
+/* Orbit animation for login page */
+@keyframes orbit {
+  from {
+    transform: rotate(0deg) translateX(140px) rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg) translateX(140px) rotate(-360deg);
+  }
+}
+
+@keyframes orbit2 {
+  from {
+    transform: rotate(120deg) translateX(110px) rotate(-120deg);
+  }
+
+  to {
+    transform: rotate(480deg) translateX(110px) rotate(-480deg);
+  }
+}
+
+@keyframes orbit3 {
+  from {
+    transform: rotate(240deg) translateX(170px) rotate(-240deg);
+  }
+
+  to {
+    transform: rotate(600deg) translateX(170px) rotate(-600deg);
+  }
+}
+
+.orbit-1 {
+  animation: orbit 8s linear infinite;
+}
+
+.orbit-2 {
+  animation: orbit2 12s linear infinite;
+}
+
+.orbit-3 {
+  animation: orbit3 6s linear infinite;
+}
+
+/* Prose content styling */
+.content-prose h1,
+.content-prose h2,
+.content-prose h3 {
+  @apply font-display font-bold mt-6 mb-3;
+}
+
+.content-prose h1 {
+  @apply text-2xl text-white;
+}
+
+.content-prose h2 {
+  @apply text-xl text-white/90;
+}
+
+.content-prose h3 {
+  @apply text-lg text-white/80;
+}
+
+.content-prose p {
+  @apply text-white/70 leading-relaxed mb-4;
+}
+
+.content-prose ul,
+.content-prose ol {
+  @apply text-white/70 mb-4 pl-5;
+}
+
+.content-prose li {
+  @apply mb-1.5;
+}
+
+.content-prose code {
+  @apply font-mono bg-ink-700 px-1.5 py-0.5 rounded text-ember-400 text-sm;
+}
+
+.content-prose pre {
+  @apply bg-ink-900 border border-white/5 rounded-xl p-4 mb-4 overflow-x-auto;
+}
+
+.content-prose pre code {
+  @apply bg-transparent p-0 text-sage-400;
+}
+
+.content-prose strong {
+  @apply text-white font-semibold;
+}
+
+.content-prose em {
+  @apply text-frost-400;
+}
+
+.content-prose blockquote {
+  @apply border-l-2 border-ember-500 pl-4 italic text-white/60 my-4;
+}
+
+.content-prose a {
+  @apply text-frost-400 underline;
+}

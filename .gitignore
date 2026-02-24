@@ -1,0 +1,22 @@
+# Node
+node_modules/
+dist/
+.env
+.env.local
+.env.production
+
+# Java
+target/
+*.log
+*.class
+*.jar
+
+# IDE
+.vscode/
+
+# Firebase
+firebase-service-account.json
+
+# OS
+.DS_Store
+Thumbs.db
