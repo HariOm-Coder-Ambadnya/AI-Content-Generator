@@ -4,40 +4,40 @@ export default {
   theme: {
     extend: {
       fontFamily: {
-        display: ['"Syne"', 'sans-serif'],
-        body: ['"DM Sans"', 'sans-serif'],
+        display: ['"Outfit"', 'sans-serif'],
+        body: ['"Inter"', 'sans-serif'],
         mono: ['"JetBrains Mono"', 'monospace'],
       },
       colors: {
-        ink: {
-          950: '#09090f',
-          900: '#0f0f1a',
-          800: '#16162a',
-          700: '#1e1e38',
-          600: '#2a2a50',
+        background: '#FFFFFF',
+        foreground: '#111827',
+        primary: {
+          DEFAULT: '#111827',
+          foreground: '#FFFFFF',
         },
-        ember: {
-          300: '#ff8c61',
-          400: '#ff6b35',
-          500: '#ff4d00',
-          600: '#cc3d00',
+        secondary: {
+          DEFAULT: '#F3F4F6',
+          foreground: '#111827',
         },
-        frost: {
-          300: '#a3ccff',
-          400: '#7eb8ff',
-          500: '#4d9fff',
-          600: '#1a7fff',
+        accent: {
+          DEFAULT: '#3B82F6',
+          hover: '#2563EB',
         },
-        sage: {
-          400: '#7dff9e',
-          500: '#4dff7a',
-        }
+        muted: {
+          DEFAULT: '#F9FAFB',
+          foreground: '#6B7280',
+        },
+        divider: '#E5E7EB',
+        ring: '#D1D5DB',
+      },
+      borderRadius: {
+        xl: '12px',
+        '2xl': '16px',
+        '3xl': '20px',
       },
       animation: {
         'fade-up': 'fadeUp 0.5s ease forwards',
-        'pulse-slow': 'pulse 3s ease-in-out infinite',
         'shimmer': 'shimmer 2s linear infinite',
-        'typewriter': 'typewriter 0.05s steps(1) forwards',
       },
       keyframes: {
         fadeUp: {

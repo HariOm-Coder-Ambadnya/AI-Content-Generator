@@ -3,7 +3,7 @@ import { Routes, Route, Navigate, useLocation } from 'react-router-dom'
 import { Toaster } from 'react-hot-toast'
 import { AuthProvider, useAuth } from './hooks/useAuth'
 import { motion, AnimatePresence } from 'framer-motion'
-import Sidebar from './components/Sidebar'
+import Navbar from './components/Navbar'
 import LoginPage from './pages/LoginPage'
 import GeneratePage from './pages/GeneratePage'
 import HistoryPage from './pages/HistoryPage'
@@ -13,14 +13,16 @@ function AppLayout() {
   const location = useLocation()
 
   return (
-    <div className="flex min-h-screen bg-ink-950">
-      <Sidebar />
-      <main className="flex-1 flex flex-col min-h-screen relative overflow-hidden text-white">
-        <Routes>
-          <Route path="/" element={<GeneratePage />} />
-          <Route path="/history" element={<HistoryPage />} />
-          <Route path="/settings" element={<SettingsPage />} />
-        </Routes>
+    <div className="flex flex-col min-h-screen bg-muted/30">
+      <Navbar />
+      <main className="flex-1 flex flex-col min-h-screen relative overflow-hidden text-foreground">
+        <div className="max-w-7xl mx-auto px-6 w-full py-10 flex-1 flex flex-col">
+          <Routes>
+            <Route path="/" element={<GeneratePage />} />
+            <Route path="/history" element={<HistoryPage />} />
+            <Route path="/settings" element={<SettingsPage />} />
+          </Routes>
+        </div>
       </main>
     </div>
   )
@@ -32,10 +34,9 @@ function Root() {
 
   if (user === undefined) {
     return (
-      <div className="min-h-screen bg-ink-950 flex items-center justify-center" style={{ backgroundColor: '#09090f' }}>
+      <div className="min-h-screen bg-white flex items-center justify-center">
         <div
-          className="w-10 h-10 border-4 border-white/10 border-t-ember-400 rounded-full animate-spin"
-          style={{ borderTopColor: '#ff4d00' }}
+          className="w-12 h-12 border-4 border-muted border-t-accent rounded-full animate-spin"
         />
       </div>
     )
@@ -58,14 +59,16 @@ export default function App() {
         position="bottom-right"
         toastOptions={{
           style: {
-            background: '#16162a',
-            color: '#fff',
-            border: '1px solid rgba(255,255,255,0.05)',
-            fontFamily: 'DM Sans, sans-serif',
+            background: '#fff',
+            color: '#111827',
+            border: '1px solid #e5e7eb',
+            fontFamily: 'Inter, sans-serif',
             fontSize: '14px',
+            borderRadius: '12px',
+            boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.05)',
           },
-          success: { iconTheme: { primary: '#4dff7a', secondary: '#16162a' } },
-          error: { iconTheme: { primary: '#ff4d00', secondary: '#16162a' } },
+          success: { iconTheme: { primary: '#10B981', secondary: '#fff' } },
+          error: { iconTheme: { primary: '#EF4444', secondary: '#fff' } },
         }}
       />
       <Root />

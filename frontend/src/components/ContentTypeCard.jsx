@@ -5,40 +5,36 @@ export const CONTENT_TYPES = [
     label: 'Blog Post',
     emoji: '✍️',
     desc: 'Long-form articles & essays',
-    accent: 'ember',
-    accentClass: 'text-ember-400',
-    bgClass: 'bg-ember-500/10 border-ember-500/20',
-    activeBg: 'bg-ember-500/20 border-ember-400/40',
+    accentClass: 'text-primary',
+    bgClass: 'bg-white border-border shadow-sm',
+    activeBg: 'bg-primary text-white border-primary shadow-xl',
   },
   {
     id: 'social',
     label: 'Social Caption',
     emoji: '📱',
     desc: 'Scroll-stopping social posts',
-    accent: 'frost',
-    accentClass: 'text-frost-400',
-    bgClass: 'bg-frost-500/10 border-frost-500/20',
-    activeBg: 'bg-frost-500/20 border-frost-400/40',
+    accentClass: 'text-primary',
+    bgClass: 'bg-white border-border shadow-sm',
+    activeBg: 'bg-primary text-white border-primary shadow-xl',
   },
   {
     id: 'marketing',
     label: 'Marketing Copy',
     emoji: '🎯',
     desc: 'Ads, emails & landing pages',
-    accent: 'sage',
-    accentClass: 'text-sage-400',
-    bgClass: 'bg-sage-500/10 border-sage-500/20',
-    activeBg: 'bg-sage-500/20 border-sage-400/40',
+    accentClass: 'text-primary',
+    bgClass: 'bg-white border-border shadow-sm',
+    activeBg: 'bg-primary text-white border-primary shadow-xl',
   },
   {
     id: 'code',
     label: 'Tech Docs',
     emoji: '💻',
     desc: 'Code snippets & documentation',
-    accent: 'purple',
-    accentClass: 'text-purple-400',
-    bgClass: 'bg-purple-500/10 border-purple-500/20',
-    activeBg: 'bg-purple-500/20 border-purple-400/40',
+    accentClass: 'text-primary',
+    bgClass: 'bg-white border-border shadow-sm',
+    activeBg: 'bg-primary text-white border-primary shadow-xl',
   },
 ]
 
@@ -46,24 +42,25 @@ export default function ContentTypeCard({ type, selected, onSelect }) {
   return (
     <button
       onClick={() => onSelect(type.id)}
-      className={`relative flex items-start gap-3 p-4 rounded-xl border transition-all duration-200 text-left w-full ${
-        selected ? type.activeBg : `${type.bgClass} hover:border-white/20`
+      className={`relative group flex items-start gap-4 p-5 rounded-2xl border transition-all duration-300 text-left w-full h-full ${
+        selected 
+          ? 'bg-black text-white border-black shadow-xl scale-[1.03]' 
+          : 'bg-white text-foreground border-border shadow-md hover:shadow-xl hover:-translate-y-1'
       }`}
     >
-      <span className="text-2xl leading-none mt-0.5">{type.emoji}</span>
-      <div>
-        <p className={`font-display font-semibold text-sm ${selected ? type.accentClass : 'text-white/80'}`}>
+      <div className={`w-12 h-12 rounded-xl flex items-center justify-center text-2xl shrink-0 transition-colors ${
+        selected ? 'bg-white/10' : 'bg-muted group-hover:bg-muted/80'
+      }`}>
+        {type.emoji}
+      </div>
+      <div className="flex-1">
+        <p className={`font-display font-bold text-base leading-tight ${selected ? 'text-white' : 'text-foreground'}`}>
           {type.label}
         </p>
-        <p className="text-white/40 text-xs font-body mt-0.5">{type.desc}</p>
+        <p className={`text-xs mt-1.5 leading-relaxed ${selected ? 'text-white/60' : 'text-muted-foreground'}`}>
+          {type.desc}
+        </p>
       </div>
-      {selected && (
-        <div className={`absolute top-2 right-2 w-2 h-2 rounded-full ${
-          type.accent === 'ember' ? 'bg-ember-400' :
-          type.accent === 'frost' ? 'bg-frost-400' :
-          type.accent === 'sage' ? 'bg-sage-400' : 'bg-purple-400'
-        } animate-pulse`} />
-      )}
     </button>
   )
 }

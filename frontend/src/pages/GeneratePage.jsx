@@ -1,6 +1,6 @@
 // src/pages/GeneratePage.jsx
 import { useState, useCallback, useRef } from 'react'
-import { Sparkles, ChevronDown, ChevronUp, StopCircle, Wand2, ArrowRight } from 'lucide-react'
+import { Sparkles, ChevronDown, ChevronUp, StopCircle, Wand2, ArrowRight, Zap, Target, AlignLeft } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { streamGenerateContent } from '../lib/groq'
 import { saveGeneration } from '../lib/firestore'
@@ -8,6 +8,8 @@ import { useAuth } from '../hooks/useAuth'
 import ContentTypeCard, { CONTENT_TYPES } from '../components/ContentTypeCard'
 import OutputPanel from '../components/OutputPanel'
 import toast from 'react-hot-toast'
+import gsap from 'gsap'
+import { useGSAP } from '@gsap/react'
 
 const TONES = [
   { id: 'professional', label: 'Professional', emoji: '👔' },
@@ -21,19 +23,6 @@ const LENGTHS = [
   { id: 'medium', label: 'Medium', hint: '~500 words' },
   { id: 'long', label: 'Long', hint: '~1000 words' },
 ]
-
-const containerVariants = {
-  hidden: { opacity: 0 },
-  visible: {
-    opacity: 1,
-    transition: { staggerChildren: 0.1 }
-  }
-}
-
-const itemVariants = {
-  hidden: { opacity: 0, y: 20 },
-  visible: { opacity: 1, y: 0 }
-}
 
 export default function GeneratePage() {
   const user = useAuth()
@@ -50,6 +39,17 @@ export default function GeneratePage() {
   const [isSaving, setIsSaving] = useState(false)
 
   const abortControllerRef = useRef(null)
+  const containerRef = useRef(null)
+
+  useGSAP(() => {
+    gsap.from('.reveal-item', {
+      y: 20,
+      opacity: 0,
+      stagger: 0.1,
+      duration: 0.8,
+      ease: 'power3.out'
+    })
+  }, { scope: containerRef })
 
   const handleStop = () => {
     if (abortControllerRef.current) {
@@ -68,7 +68,6 @@ export default function GeneratePage() {
     setIsGenerating(true)
     setOutput('')
 
-    // Create new abort controller for this request
     const controller = new AbortController()
     abortControllerRef.current = controller
 
@@ -80,7 +79,7 @@ export default function GeneratePage() {
         length,
         audience,
         additionalContext,
-        signal: controller.signal // Signal will be handled by fetch in groq.js (need to update groq.js)
+        signal: controller.signal
       })
 
       for await (const chunk of generator) {
@@ -119,209 +118,202 @@ export default function GeneratePage() {
   const selectedType = CONTENT_TYPES.find(t => t.id === contentType)
 
   return (
-    <div className="flex-1 p-8 overflow-y-auto custom-scrollbar">
-      <motion.div
-        variants={containerVariants}
-        initial="hidden"
-        animate="visible"
-        className="max-w-4xl mx-auto space-y-8 pb-20"
-      >
-        {/* Header */}
-        <motion.div variants={itemVariants} className="relative">
-          <div className="flex items-center gap-4 mb-2">
-            <h1 className="font-display text-4xl font-bold tracking-tight">
-              Create Content
-            </h1>
-            <div className={`px-3 py-1 rounded-full text-xs font-bold uppercase tracking-widest ${selectedType?.bgClass} ${selectedType?.accentClass} border border-current`}>
-              {selectedType?.emoji} {selectedType?.label}
+    <div ref={containerRef} className="max-w-5xl mx-auto w-full space-y-12 pb-32">
+      {/* Header Section */}
+      <div className="reveal-item space-y-4">
+        <div className="flex items-center gap-3 text-muted-foreground uppercase text-[10px] font-bold tracking-widest">
+           <Zap className="w-3 h-3 text-accent" />
+           <span>FORGE GENERATOR v2.0</span>
+        </div>
+        <h1 className="font-display text-5xl font-bold tracking-tight text-foreground">
+          What are we <span className="text-accent underline decoration-accent/10">creating</span> today?
+        </h1>
+        <p className="text-muted-foreground text-lg max-w-2xl leading-relaxed">
+          Select a format, provide a few details, and watch our AI forge high-performance content for your brand.
+        </p>
+      </div>
+
+      {/* Grid: Type & Input */}
+      <div className="grid grid-cols-1 lg:grid-cols-1 gap-12">
+        <div className="space-y-10">
+          {/* Format Selection */}
+          <div className="reveal-item space-y-4">
+            <div className="flex items-center justify-between">
+              <label className="text-xs font-bold uppercase tracking-widest text-muted-foreground flex items-center gap-2">
+                <Target className="w-4 h-4" /> 1. CHOOSE FORMAT
+              </label>
+              <span className="text-[10px] text-muted-foreground/50">Pick a specialized AI engine</span>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              {CONTENT_TYPES.map(type => (
+                <ContentTypeCard
+                  key={type.id}
+                  type={type}
+                  selected={contentType === type.id}
+                  onSelect={setContentType}
+                />
+              ))}
             </div>
           </div>
-          <p className="text-white/40 font-body text-lg max-w-2xl leading-relaxed">
-            Harness the power of Llama 3.3 to generate high-quality {selectedType?.label.toLowerCase()} content in seconds.
-          </p>
-        </motion.div>
 
-        {/* Content Type Grid */}
-        <motion.div variants={itemVariants} className="space-y-4">
-          <div className="flex items-center justify-between">
-            <label className="text-xs font-display font-bold uppercase tracking-widest text-white/30">
-              Output Format
+          {/* Prompt Area */}
+          <div className="reveal-item space-y-4">
+            <label className="text-xs font-bold uppercase tracking-widest text-muted-foreground flex items-center gap-2">
+              <AlignLeft className="w-4 h-4" /> 2. PROVIDE CONTEXT
             </label>
-            <span className="text-[10px] font-body text-white/20 italic">Choose what to generate</span>
-          </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            {CONTENT_TYPES.map(type => (
-              <ContentTypeCard
-                key={type.id}
-                type={type}
-                selected={contentType === type.id}
-                onSelect={setContentType}
+            <div className="relative group">
+              <textarea
+                className="input-field min-h-[200px] bg-white text-lg p-8 shadow-md group-focus-within:shadow-xl transition-all leading-relaxed"
+                placeholder={
+                  contentType === 'blog' ? 'Enter the topic for your article...' :
+                  contentType === 'social' ? 'What should the caption be about?' :
+                  contentType === 'marketing' ? 'Describe the product or campaign...' :
+                  'What technical document or code should we generate?'
+                }
+                value={topic}
+                onChange={e => setTopic(e.target.value)}
+                onKeyDown={e => { if (e.key === 'Enter' && e.metaKey) handleGenerate() }}
               />
-            ))}
-          </div>
-        </motion.div>
-
-        {/* Main Input */}
-        <motion.div variants={itemVariants} className="space-y-4">
-          <label className="block text-xs font-display font-bold uppercase tracking-widest text-white/30">
-            Topic & Briefing
-          </label>
-          <div className="relative group">
-            <textarea
-              className="input-field min-h-[160px] resize-none text-base bg-ink-900/40 border-white/5 focus:bg-ink-900 focus:border-white/10 transition-all font-body leading-relaxed p-6"
-              placeholder={
-                contentType === 'blog' ? 'What should the article be about? Mention specific points or keywords you want covered...' :
-                  contentType === 'social' ? 'What are we promoting? What is the main message or offer for social media?' :
-                    contentType === 'marketing' ? 'Describe the product or service and the primary goal of this copy (e.g., clicks, sales).' :
-                      'What code should I write or document? Be specific about technologies and requirements.'
-              }
-              value={topic}
-              onChange={e => setTopic(e.target.value)}
-              onKeyDown={e => { if (e.key === 'Enter' && e.metaKey) handleGenerate() }}
-            />
-            <div className="absolute bottom-4 right-4 flex items-center gap-2">
-              <span className="text-white/10 text-[10px] font-mono tracking-tighter">⌘+ENTER TO FORGE</span>
-            </div>
-          </div>
-        </motion.div>
-
-        {/* Tone & Length */}
-        <motion.div variants={itemVariants} className="grid grid-cols-1 md:grid-cols-2 gap-8">
-          <div className="space-y-4">
-            <label className="block text-xs font-display font-bold uppercase tracking-widest text-white/30 text-center md:text-left">
-              Content Tone
-            </label>
-            <div className="grid grid-cols-2 gap-3">
-              {TONES.map(t => (
-                <button
-                  key={t.id}
-                  onClick={() => setTone(t.id)}
-                  className={`flex items-center justify-center gap-2 px-4 py-3 rounded-2xl border text-sm font-display font-semibold transition-all duration-300 ${tone === t.id
-                    ? 'bg-amber-500/10 border-amber-500/50 text-amber-400 shadow-[0_0_20px_rgba(255,77,0,0.1)]'
-                    : 'bg-white/[0.02] border-white/5 text-white/40 hover:border-white/20 hover:text-white/70'
-                    }`}
-                >
-                  <span className={`${tone === t.id ? 'scale-125' : ''} transition-transform`}>{t.emoji}</span> {t.label}
-                </button>
-              ))}
+              <div className="absolute bottom-6 right-8 text-[10px] font-bold uppercase tracking-widest text-muted-foreground/30 pointer-events-none">
+                ⌘ + ENTER TO FORGE
+              </div>
             </div>
           </div>
 
-          <div className="space-y-4">
-            <label className="block text-xs font-display font-bold uppercase tracking-widest text-white/30 text-center md:text-left">
-              Target Length
-            </label>
-            <div className="flex flex-col gap-3">
-              {LENGTHS.map(l => (
-                <button
-                  key={l.id}
-                  onClick={() => setLength(l.id)}
-                  className={`flex items-center justify-between px-5 py-3 rounded-2xl border text-sm font-body transition-all duration-300 ${length === l.id
-                    ? 'bg-frost-500/10 border-frost-500/50 text-frost-400 shadow-[0_0_20px_rgba(77,159,255,0.1)]'
-                    : 'bg-white/[0.02] border-white/5 text-white/40 hover:border-white/20 hover:text-white/70'
-                    }`}
-                >
-                  <span className="font-bold tracking-tight uppercase text-xs">{l.label}</span>
-                  <span className={`text-[10px] font-medium opacity-40`}>{l.hint}</span>
-                </button>
-              ))}
-            </div>
+          {/* Secondary Controls */}
+          <div className="reveal-item grid grid-cols-1 md:grid-cols-2 gap-8">
+             <div className="space-y-4">
+               <label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Select Tone</label>
+               <div className="grid grid-cols-2 gap-2">
+                 {TONES.map(t => (
+                   <button
+                     key={t.id}
+                     onClick={() => setTone(t.id)}
+                     className={`flex items-center gap-3 px-4 py-3 rounded-xl border text-sm font-medium transition-all ${
+                       tone === t.id 
+                       ? 'bg-black text-white border-black shadow-xl active:scale-[0.98]' 
+                       : 'bg-white text-foreground border-border hover:bg-muted'
+                     }`}
+                   >
+                     <span className="text-lg">{t.emoji}</span>
+                     {t.label}
+                   </button>
+                 ))}
+               </div>
+             </div>
+             
+             <div className="space-y-4">
+               <label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Desired Length</label>
+               <div className="flex flex-col gap-2">
+                  {LENGTHS.map(l => (
+                    <button
+                      key={l.id}
+                      onClick={() => setLength(l.id)}
+                      className={`flex items-center justify-between px-6 py-3 rounded-xl border text-sm font-medium transition-all ${
+                        length === l.id 
+                        ? 'bg-black text-white border-black shadow-xl active:scale-[0.98]' 
+                        : 'bg-white text-foreground border-border hover:bg-muted'
+                      }`}
+                    >
+                      <span className="uppercase tracking-tighter text-xs font-bold">{l.label}</span>
+                      <span className={`text-[10px] opacity-40`}>{l.hint}</span>
+                    </button>
+                  ))}
+               </div>
+             </div>
           </div>
-        </motion.div>
 
-        {/* Advanced Options */}
-        <motion.div variants={itemVariants} className="pt-2">
-          <button
-            onClick={() => setShowAdvanced(!showAdvanced)}
-            className="flex items-center gap-2 text-[10px] font-display font-bold uppercase tracking-[0.2em] text-white/20 hover:text-white/60 transition-colors mx-auto"
-          >
-            {showAdvanced ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
-            {showAdvanced ? 'Hide' : 'Show'} Advanced configurations
-          </button>
-
-          <AnimatePresence>
-            {showAdvanced && (
-              <motion.div
-                initial={{ height: 0, opacity: 0 }}
-                animate={{ height: 'auto', opacity: 1 }}
-                exit={{ height: 0, opacity: 0 }}
-                className="overflow-hidden"
-              >
-                <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-6 bg-white/[0.02] p-6 rounded-3xl border border-white/5">
-                  <div className="space-y-2">
-                    <label className="block text-[10px] font-display font-bold uppercase tracking-widest text-white/30">Target Audience</label>
-                    <input
-                      type="text"
-                      className="input-field bg-ink-950/50"
-                      placeholder="e.g. SaaS founders, Gen Z, senior devs…"
-                      value={audience}
-                      onChange={e => setAudience(e.target.value)}
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <label className="block text-[10px] font-display font-bold uppercase tracking-widest text-white/30">Style Context</label>
-                    <input
-                      type="text"
-                      className="input-field bg-ink-950/50"
-                      placeholder="e.g. Minimalist, technical, high-energy…"
-                      value={additionalContext}
-                      onChange={e => setAdditionalContext(e.target.value)}
-                    />
-                  </div>
-                </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
-        </motion.div>
-
-        {/* Generate Button container with shadow */}
-        <motion.div
-          variants={itemVariants}
-          className="sticky bottom-8 z-20 pointer-events-none flex justify-center w-full"
-        >
-          <div className="pointer-events-auto w-full max-w-sm">
-            {isGenerating ? (
-              <button
-                onClick={handleStop}
-                className="w-full flex items-center justify-center gap-3 py-4 text-sm font-display font-bold uppercase tracking-widest rounded-3xl bg-red-500/10 border border-red-500/50 text-red-400 hover:bg-red-500/20 transition-all shadow-[0_10px_30px_rgba(239,68,68,0.2)]"
-              >
-                <StopCircle className="w-5 h-5 animate-pulse" />
-                Stop Generation
-              </button>
-            ) : (
-              <button
-                onClick={handleGenerate}
-                disabled={!topic.trim()}
-                className="group w-full flex items-center justify-center gap-3 py-4 text-sm font-display font-bold uppercase tracking-widest rounded-3xl bg-gradient-to-r from-ember-500 to-frost-500 text-white shadow-[0_10px_30px_rgba(255,77,0,0.3)] hover:shadow-[0_15px_40px_rgba(255,77,0,0.4)] hover:scale-[1.02] active:scale-95 disabled:opacity-50 disabled:grayscale disabled:hover:scale-100 transition-all cursor-pointer"
-              >
-                <Wand2 className="w-5 h-5" />
-                Forge Content
-                <ArrowRight className="w-4 h-4 opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all" />
-              </button>
-            )}
-          </div>
-        </motion.div>
-
-        {/* Output */}
-        <AnimatePresence>
-          {(output || isGenerating) && (
-            <motion.div
-              initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.95 }}
-              transition={{ type: 'spring', damping: 20 }}
+          {/* Advanced Dropdown */}
+          <div className="reveal-item pt-4">
+            <button
+              onClick={() => setShowAdvanced(!showAdvanced)}
+              className="group mx-auto flex flex-col items-center gap-2 text-[10px] font-bold uppercase tracking-[0.3em] text-muted-foreground/40 hover:text-foreground transition-all"
             >
-              <OutputPanel
-                content={output}
-                isStreaming={isGenerating && !output}
-                onRegenerate={handleGenerate}
-                onSave={handleSave}
-                isSaving={isSaving}
-              />
-            </motion.div>
+              <span>{showAdvanced ? 'Simplify Context' : 'Advanced Configuration'}</span>
+              <div className="w-8 h-[1px] bg-border group-hover:w-16 transition-all" />
+            </button>
+
+            <AnimatePresence>
+              {showAdvanced && (
+                <motion.div
+                  initial={{ height: 0, opacity: 0 }}
+                  animate={{ height: 'auto', opacity: 1 }}
+                  exit={{ height: 0, opacity: 0 }}
+                  className="overflow-hidden mt-8"
+                >
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6 p-8 bg-muted/30 border border-border rounded-2xl">
+                    <div className="space-y-2">
+                      <label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Target Audience</label>
+                      <input
+                        type="text"
+                        className="input-field h-12 bg-white"
+                        placeholder="e.g. Content Marketers, Developers..."
+                        value={audience}
+                        onChange={e => setAudience(e.target.value)}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Additional Context</label>
+                      <input
+                        type="text"
+                        className="input-field h-12 bg-white"
+                        placeholder="e.g. Mention our new features..."
+                        value={additionalContext}
+                        onChange={e => setAdditionalContext(e.target.value)}
+                      />
+                    </div>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
+        </div>
+      </div>
+
+      {/* Generation Bar (Sticky) */}
+      <div className="sticky bottom-10 z-[30] flex justify-center w-full reveal-item pointer-events-none">
+        <div className="pointer-events-auto w-full max-w-sm">
+          {isGenerating ? (
+            <button
+              onClick={handleStop}
+              className="w-full flex items-center justify-center gap-3 py-5 rounded-full bg-red-50 text-red-600 border border-red-100 font-bold uppercase text-xs tracking-widest shadow-xl hover:bg-red-100 transition-all"
+            >
+              <StopCircle className="w-5 h-5 animate-pulse" />
+              Abort Forging
+            </button>
+          ) : (
+            <button
+              onClick={handleGenerate}
+              disabled={!topic.trim()}
+              className="w-full group flex items-center justify-center gap-4 py-5 rounded-full bg-black text-white font-bold uppercase text-xs tracking-[0.2em] shadow-xl hover:shadow-[0_20px_40px_rgba(0,0,0,0.15)] hover:-translate-y-1 transition-all disabled:opacity-20 disabled:grayscale"
+            >
+              <Sparkles className="w-5 h-5" />
+              Forge Content
+              <ArrowRight className="w-5 h-5 opacity-40 group-hover:translate-x-1 group-hover:opacity-100 transition-all" />
+            </button>
           )}
-        </AnimatePresence>
-      </motion.div>
+        </div>
+      </div>
+
+      {/* Output Result */}
+      <AnimatePresence>
+        {(output || isGenerating) && (
+          <motion.div
+            initial={{ opacity: 0, y: 40 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.95 }}
+            className="reveal-item"
+          >
+            <OutputPanel
+              content={output}
+              isStreaming={isGenerating && !output}
+              onRegenerate={handleGenerate}
+              onSave={handleSave}
+              isSaving={isSaving}
+            />
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   )
 }
