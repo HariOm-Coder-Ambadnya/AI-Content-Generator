@@ -1,12 +1,9 @@
 server:
-  port: 8080
+  port: ${PORT:8080}
 
 spring:
   application:
     name: forge-backend
 
 firebase:
-  service-account-path: firebase-service-account.json
-
-# Place firebase-service-account.json in src/main/resources/
-# Download from: Firebase Console → Project Settings → Service Accounts → Generate new private key
+  service-account-path: ${FIREBASE_SERVICE_ACCOUNT_PATH:firebase-service-account.json}

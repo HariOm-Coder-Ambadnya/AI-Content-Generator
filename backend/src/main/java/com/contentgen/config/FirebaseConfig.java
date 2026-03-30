@@ -20,7 +20,21 @@ public class FirebaseConfig {
     @PostConstruct
     public void initialize() throws IOException {
         if (FirebaseApp.getApps().isEmpty()) {
-            InputStream serviceAccount = new ClassPathResource(serviceAccountPath).getInputStream();
+            InputStream serviceAccount;
+            
+            // Try as a file path first (standard for production/Docker mounts)
+            java.io.File file = new java.io.File(serviceAccountPath);
+            if (file.exists()) {
+                serviceAccount = new java.io.FileInputStream(file);
+            } else {
+                // Fall back to Classpath (standard for local dev)
+                try {
+                    serviceAccount = new ClassPathResource(serviceAccountPath).getInputStream();
+                } catch (IOException e) {
+                    throw new IOException("Firebase service account file not found: " + serviceAccountPath);
+                }
+            }
+
             FirebaseOptions options = FirebaseOptions.builder()
                     .setCredentials(GoogleCredentials.fromStream(serviceAccount))
                     .build();
