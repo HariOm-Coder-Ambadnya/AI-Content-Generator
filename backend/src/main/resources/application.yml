@@ -8,3 +8,4 @@ spring:
 firebase:
   service-account-path: ${FIREBASE_SERVICE_ACCOUNT_PATH:firebase-service-account.json}
   service-account-json: ${FIREBASE_SERVICE_ACCOUNT_JSON:}
+  service-account-base64: ${FIREBASE_SERVICE_ACCOUNT_BASE64:}

@@ -20,29 +20,38 @@ public class FirebaseConfig {
     @Value("${firebase.service-account-json:}")
     private String serviceAccountJson;
 
+    @Value("${firebase.service-account-base64:}")
+    private String serviceAccountBase64;
+
     @PostConstruct
     public void initialize() throws IOException {
         if (FirebaseApp.getApps().isEmpty()) {
             InputStream serviceAccount = null;
 
-            // 1. Try JSON string from environment first (most flexible for cloud platforms)
-            if (serviceAccountJson != null && !serviceAccountJson.trim().isEmpty()) {
+            // 1. Try Base64 encoded string from environment (most reliable for cloud platforms like Render)
+            if (serviceAccountBase64 != null && !serviceAccountBase64.trim().isEmpty()) {
+                System.out.println("Firebase service account: Loading from FIREBASE_SERVICE_ACCOUNT_BASE64 environment variable.");
+                byte[] decodedBytes = java.util.Base64.getDecoder().decode(serviceAccountBase64);
+                serviceAccount = new java.io.ByteArrayInputStream(decodedBytes);
+            }
+            // 2. Try JSON string from environment
+            else if (serviceAccountJson != null && !serviceAccountJson.trim().isEmpty()) {
                 System.out.println("Firebase service account: Loading from FIREBASE_SERVICE_ACCOUNT_JSON environment variable.");
                 serviceAccount = new java.io.ByteArrayInputStream(serviceAccountJson.getBytes(java.nio.charset.StandardCharsets.UTF_8));
             } else {
-                // 2. Try as a file path (standard for Docker mounts or local filesystem)
+                // 3. Try as a file path (standard for Docker mounts or local filesystem)
                 java.io.File file = new java.io.File(serviceAccountPath);
                 if (file.exists()) {
                     System.out.println("Firebase service account: Loading from file path: " + serviceAccountPath);
                     serviceAccount = new java.io.FileInputStream(file);
                 } else {
-                    // 3. Fall back to Classpath (standard for local dev)
+                    // 4. Fall back to Classpath (standard for local dev)
                     System.out.println("Firebase service account: Attempting to load from classpath: " + serviceAccountPath);
                     try {
                         serviceAccount = new ClassPathResource(serviceAccountPath).getInputStream();
                     } catch (IOException e) {
                         throw new IOException("Firebase service account not found! Checked: " +
-                                "environment string (empty), file path (" + file.getAbsolutePath() + "), and classpath.");
+                                "environment base64 string, environment raw JSON string, file path (" + file.getAbsolutePath() + "), and classpath.");
                     }
                 }
             }
