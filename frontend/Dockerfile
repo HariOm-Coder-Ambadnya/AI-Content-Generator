@@ -7,8 +7,9 @@ COPY . .
 RUN npm run build
 
 # Production stage - Nginx
-FROM nginx:alpine
+FROM nginx:stable-alpine
 COPY --from=build /app/dist /usr/share/nginx/html
-# Default Nginx config should be enough, but if needed, custom config here
+# Copy custom nginx config
+COPY nginx.conf /etc/nginx/conf.d/default.conf
 EXPOSE 80
 CMD ["nginx", "-g", "daemon off;"]

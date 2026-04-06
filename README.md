@@ -1,53 +1,81 @@
-# 🚀 AI Content Generator
+# 🚀 Forge — AI Content Generator
 
-Full Stack AI-powered content generation platform built using:
+Forge is a high-performance, full-stack AI content generation platform designed for creators and marketers. It leverages Spring Boot, React, and Groq to deliver instant content generation.
 
-- Spring Boot (Backend)
-- React + Vite (Frontend)
-- Firebase Authentication
-- Firestore Database
-- Grok API Integration
+## 🌟 Features
 
----
-
-## Features
-
-- Firebase Authentication
-- AI Content Generation
-- REST API Backend
-- Modern UI
-- Firestore Integration
+- **Multi-Source AI**: Powered by Groq (LLama 3.3) for lightning-fast generation.
+- **Secure Authentication**: Integrated with Firebase Auth (Google Sign-In).
+- **Persistent Storage**: Uses Firestore for saving and managing generated content.
+- **Premium UI**: Crafted with Vite, React, Framer Motion, and GSAP.
+- **Microservices Ready**: Frontend and Backend are fully containerized.
 
 ---
 
-## Backend Setup
+## 🛠️ Tech Stack
 
-cd backend  
-mvn clean install  
-mvn spring-boot:run  
-
-Required Environment Variables:
-
-FIREBASE_SERVICE_ACCOUNT=path_to_json  
-GROK_API_KEY=your_api_key  
+- **Frontend**: React 18, Vite, Tailwind CSS, GSAP, Framer Motion.
+- **Backend**: Spring Boot 3.3, Java 17, Spring Security.
+- **AI/API**: Groq API, Firebase Admin SDK.
+- **Deployment**: Docker, Vercel (Frontend), Render/AWS/GCP (Backend).
 
 ---
 
-## Frontend Setup
+## 🚀 Quick Start (Local Development)
 
-cd frontend  
-npm install  
-npm run dev  
+### 1. Backend Setup
+```bash
+cd backend
+# Fill in your .env (refer to .env.example)
+mvn spring-boot:run
+```
 
-Create .env file:
-
-VITE_FIREBASE_API_KEY=  
-VITE_FIREBASE_AUTH_DOMAIN=  
-VITE_FIREBASE_PROJECT_ID=  
-VITE_BACKEND_URL=http://localhost:8080  
+### 2. Frontend Setup
+```bash
+cd frontend
+npm install
+# Fill in your .env (refer to .env.example)
+npm run dev
+```
 
 ---
 
-## Author
+## 📦 Deployment (Ready for Production)
 
-Rishikesh Pawar
+### Using Docker Compose
+The easiest way to deploy the entire stack locally or on a VPS:
+```bash
+docker-compose up --build
+```
+This will start:
+- **Frontend** at `http://localhost`
+- **Backend** at `http://localhost:8080`
+
+### Manual Production Deployment
+
+#### Frontend (Vercel/Netlify)
+1. Push the `frontend` directory to a Git repo.
+2. Connect to Vercel/Netlify.
+3. Set environment variables from `.env.example`.
+4. Build Command: `npm run build`
+5. Output Directory: `dist`
+
+#### Backend (Render/Heroku/AWS)
+1. Push the `backend` directory to a Git repo.
+2. Build Command: `mvn clean package -DskipTests`
+3. Start Command: `java -jar target/forge-backend-*.jar`
+4. Set required environment variables (Firebase Service Account JSON as a secret).
+
+---
+
+## 🔑 Environment Variables
+
+Check `.env.example` in both `frontend` and `backend` directories for the required keys.
+
+> [!IMPORTANT]
+> Never commit actual `.env` files to version control. Use secrets management for production.
+
+---
+
+## 🛡️ License
+MIT License. Created by **Rishikesh Pawar**.
