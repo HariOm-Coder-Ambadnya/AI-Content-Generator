@@ -6,11 +6,14 @@ import { Key, User, Shield, Info, ExternalLink, Activity, Database, Lock, Globe 
 import toast from 'react-hot-toast'
 import gsap from 'gsap'
 import { useGSAP } from '@gsap/react'
+import { fetchFromBackend } from '../lib/api'
 
 export default function SettingsPage() {
   const user = useAuth()
   const [apiKey, setApiKey] = useState(localStorage.getItem('groq_api_key') || '')
   const [saving, setSaving] = useState(false)
+  const [backendStatus, setBackendStatus] = useState(null)
+  const [checkingBackend, setCheckingBackend] = useState(false)
   const containerRef = useRef(null)
 
   useGSAP(() => {
@@ -33,6 +36,25 @@ export default function SettingsPage() {
       toast.success('API key cleared')
     }
     setSaving(false)
+  }
+
+  const checkBackend = async () => {
+    setCheckingBackend(true)
+    try {
+      const data = await fetchFromBackend('/health')
+      if (data.status === 'ok') {
+        setBackendStatus('online')
+        toast.success('Connected to Render Backend!')
+      } else {
+        setBackendStatus('error')
+      }
+    } catch (err) {
+      console.error(err)
+      setBackendStatus('offline')
+      toast.error('Failed to connect to backend')
+    } finally {
+      setCheckingBackend(false)
+    }
   }
 
   return (
@@ -87,15 +109,31 @@ export default function SettingsPage() {
 
         {/* Info Stats */}
         <div className="settings-card space-y-4">
-           <div className="bg-white border border-border rounded-2xl p-6 shadow-md flex items-center gap-4">
-              <div className="w-12 h-12 rounded-xl bg-accent/5 text-accent flex items-center justify-center">
-                 <Activity className="w-6 h-6" />
+            <div className="bg-white border border-border rounded-2xl p-6 shadow-md flex flex-col gap-4">
+              <div className="flex items-center gap-4">
+                <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${
+                  backendStatus === 'online' ? 'bg-green-50 text-green-600' : 
+                  backendStatus === 'offline' ? 'bg-red-50 text-red-600' :
+                  'bg-muted text-muted-foreground'
+                }`}>
+                  <Activity className="w-6 h-6" />
+                </div>
+                <div className="flex-1">
+                  <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Server Core</p>
+                  <p className="font-display font-bold text-lg">
+                    {checkingBackend ? 'Syncing...' : backendStatus === 'online' ? 'Connected' : backendStatus === 'offline' ? 'Offline' : 'Untested'}
+                  </p>
+                </div>
               </div>
-              <div>
-                 <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Stability</p>
-                 <p className="font-display font-bold text-lg">99.99% UP</p>
-              </div>
-           </div>
+              <button 
+                onClick={checkBackend}
+                disabled={checkingBackend}
+                className="w-full py-2 bg-muted hover:bg-muted/80 rounded-xl text-[10px] font-black uppercase tracking-widest transition-colors disabled:opacity-50"
+              >
+                Sync with Cloud
+              </button>
+            </div>
+
            <div className="bg-white border border-border rounded-2xl p-6 shadow-md flex items-center gap-4">
               <div className="w-12 h-12 rounded-xl bg-green-50 text-green-600 flex items-center justify-center">
                  <Globe className="w-6 h-6" />
