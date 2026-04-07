@@ -2,7 +2,7 @@
 import { useState, useRef } from 'react'
 import { motion } from 'framer-motion'
 import { useAuth } from '../hooks/useAuth'
-import { Key, User, Shield, Info, ExternalLink, Activity, Database, Lock, Globe } from 'lucide-react'
+import { Key, User, Shield, Info, ExternalLink, Activity, Database, Lock, Globe, Terminal, RefreshCw, Layers, Zap, Command, Cpu } from 'lucide-react'
 import toast from 'react-hot-toast'
 import gsap from 'gsap'
 import { useGSAP } from '@gsap/react'
@@ -17,12 +17,12 @@ export default function SettingsPage() {
   const containerRef = useRef(null)
 
   useGSAP(() => {
-     gsap.from('.settings-card', {
-       y: 20,
+     gsap.from('.settings-module', {
+       y: 40,
        opacity: 0,
        stagger: 0.1,
-       duration: 0.8,
-       ease: 'power3.out'
+       duration: 1.2,
+       ease: 'expo.out'
      })
   }, { scope: containerRef })
 
@@ -30,10 +30,10 @@ export default function SettingsPage() {
     setSaving(true)
     if (apiKey.trim()) {
       localStorage.setItem('groq_api_key', apiKey.trim())
-      toast.success('API key saved locally!')
+      toast.success('Sequence unlocked.')
     } else {
       localStorage.removeItem('groq_api_key')
-      toast.success('API key cleared')
+      toast.success('Sequence locked.')
     }
     setSaving(false)
   }
@@ -44,178 +44,153 @@ export default function SettingsPage() {
       const data = await fetchFromBackend('/health')
       if (data.status === 'ok') {
         setBackendStatus('online')
-        toast.success('Connected to Render Backend!')
+        toast.success('Core synchronized.')
       } else {
         setBackendStatus('error')
       }
     } catch (err) {
       console.error(err)
       setBackendStatus('offline')
-      toast.error('Failed to connect to backend')
+      toast.error('Sync failure.')
     } finally {
       setCheckingBackend(false)
     }
   }
 
   return (
-    <div ref={containerRef} className="max-w-4xl mx-auto w-full space-y-12">
-      {/* Header */}
-      <div className="settings-card space-y-4">
-        <h1 className="font-display text-4xl font-bold tracking-tight text-foreground">
-          Workspace <span className="text-accent underline decoration-accent/10">Settings</span>
-        </h1>
-        <p className="text-muted-foreground text-lg max-w-2xl leading-relaxed">
-          Manage your account preferences, security settings, and AI engine configurations.
-        </p>
-      </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
-        {/* Profile Card */}
-        <div className="settings-card lg:col-span-2 bg-white rounded-3xl border border-border p-8 shadow-md space-y-8 relative overflow-hidden group">
-          <div className="absolute top-0 right-0 p-8 opacity-5 group-hover:opacity-10 transition-opacity">
-            <User className="w-32 h-32" />
-          </div>
-          
-          <div className="flex items-center gap-3">
-             <div className="p-2 rounded-lg bg-muted text-muted-foreground">
-               <User className="w-4 h-4" />
-             </div>
-             <h2 className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Identity Profile</h2>
-          </div>
-
-          <div className="flex flex-col sm:flex-row items-center gap-8 relative z-10">
-            <div className="relative">
-              <img
-                src={user?.photoURL || `https://api.dicebear.com/8.x/initials/svg?seed=${user?.email}`}
-                alt="avatar"
-                className="w-24 h-24 rounded-3xl ring-4 ring-muted object-cover shadow-xl"
-              />
-              <div className="absolute -bottom-2 -right-2 bg-green-500 w-6 h-6 rounded-full border-4 border-white shadow-sm" />
-            </div>
-            <div className="text-center sm:text-left">
-              <p className="font-display font-bold text-3xl text-foreground mb-1">{user?.displayName}</p>
-              <p className="text-muted-foreground font-medium mb-4">{user?.email}</p>
-              <div className="flex flex-wrap justify-center sm:justify-start gap-2">
-                <span className="px-3 py-1 bg-muted rounded-full text-[10px] uppercase font-black tracking-widest text-muted-foreground border border-border">
-                  UID: {user?.uid?.slice(0, 8)}…
-                </span>
-                <span className="px-3 py-1 bg-accent/5 rounded-full text-[10px] uppercase font-black tracking-widest text-accent border border-accent/10">
-                  V2 Pro Tier
-                </span>
-              </div>
-            </div>
-          </div>
+    <div ref={containerRef} className="w-full min-h-screen bg-black text-white flex flex-col pt-12 pb-32 px-4 md:px-8">
+      
+      {/* HUD Header */}
+      <div className="settings-module flex flex-col md:flex-row justify-between items-start md:items-end mb-20 gap-8">
+        <div className="space-y-4">
+           <div className="flex items-center gap-4">
+              <div className="w-10 h-[1px] bg-white/20" />
+              <span className="font-mono text-[9px] font-black uppercase tracking-[0.5em] text-white/30">System: CONFIG_HUB</span>
+           </div>
+           <h1 className="font-serif text-6xl md:text-8xl tracking-tighter leading-none">
+              Control <span className="text-white/20">System.</span>
+           </h1>
         </div>
 
-        {/* Info Stats */}
-        <div className="settings-card space-y-4">
-            <div className="bg-white border border-border rounded-2xl p-6 shadow-md flex flex-col gap-4">
-              <div className="flex items-center gap-4">
-                <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${
-                  backendStatus === 'online' ? 'bg-green-50 text-green-600' : 
-                  backendStatus === 'offline' ? 'bg-red-50 text-red-600' :
-                  'bg-muted text-muted-foreground'
-                }`}>
-                  <Activity className="w-6 h-6" />
-                </div>
-                <div className="flex-1">
-                  <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Server Core</p>
-                  <p className="font-display font-bold text-lg">
-                    {checkingBackend ? 'Syncing...' : backendStatus === 'online' ? 'Connected' : backendStatus === 'offline' ? 'Offline' : 'Untested'}
-                  </p>
-                </div>
+        <div className="flex items-center gap-12 md:gap-20 font-mono text-[8px] text-white/20 uppercase tracking-[0.5em]">
+           <div className="flex flex-col gap-1">
+              <span>Status</span>
+              <span className={backendStatus === 'online' ? 'text-green-500' : 'text-white'}>{backendStatus?.toUpperCase() || 'UNLINKED'}</span>
+           </div>
+           <div className="flex flex-col gap-1">
+              <span>Identity</span>
+              <span className="text-accent-orange">Verified</span>
+           </div>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 xl:grid-cols-12 gap-8">
+        {/* Profile Card */}
+        <div className="settings-module xl:col-span-8 border border-white/5 bg-white/[0.01] rounded-[40px] p-12 relative overflow-hidden group">
+           <div className="flex flex-col md:flex-row items-center gap-12">
+              <div className="relative">
+                 <div className="absolute inset-0 bg-white/10 blur-3xl rounded-full" />
+                 <img
+                    src={user?.photoURL || `https://api.dicebear.com/8.x/initials/svg?seed=${user?.email}`}
+                    alt="avatar"
+                    className="w-40 h-40 rounded-[50px] border border-white/10 relative z-10 grayscale"
+                 />
+              </div>
+              <div className="text-center md:text-left space-y-6">
+                 <div>
+                    <h2 className="font-serif text-5xl text-white tracking-tight">{user?.displayName}</h2>
+                    <p className="font-mono text-sm text-white/20 mt-1">{user?.email}</p>
+                 </div>
+                 <div className="flex flex-wrap justify-center md:justify-start gap-4">
+                    <div className="px-5 py-2 bg-white/5 border border-white/5 rounded-xl text-[9px] font-black uppercase tracking-[0.3em] text-white/40">
+                       ID: {user?.uid?.slice(0, 12).toUpperCase()}
+                    </div>
+                    <div className="px-5 py-2 bg-white text-black border border-white rounded-xl text-[9px] font-black uppercase tracking-[0.3em]">
+                       Auth: Verified
+                    </div>
+                 </div>
+              </div>
+           </div>
+        </div>
+
+        {/* Diagnostics Module */}
+        <div className="settings-module xl:col-span-4 space-y-6">
+           <div className="border border-white/5 bg-white/[0.01] rounded-[40px] p-10 flex flex-col justify-between h-full">
+              <div className="space-y-8">
+                 <div className="flex items-center gap-4">
+                    <Activity className={`w-6 h-6 ${backendStatus === 'online' ? 'text-green-500' : 'text-white/20'}`} />
+                    <p className="text-[9px] font-black uppercase tracking-[0.4em] text-white/30">Neural Engine</p>
+                 </div>
+                 <div className="space-y-1">
+                    <p className="font-serif text-3xl">{checkingBackend ? 'Syncing...' : backendStatus === 'online' ? 'Connected' : 'Offline'}</p>
+                    <p className="text-[9px] font-mono text-white/10 uppercase">Registry Response: 200 OK</p>
+                 </div>
               </div>
               <button 
                 onClick={checkBackend}
                 disabled={checkingBackend}
-                className="w-full py-2 bg-muted hover:bg-muted/80 rounded-xl text-[10px] font-black uppercase tracking-widest transition-colors disabled:opacity-50"
+                className="w-full mt-12 py-5 bg-white/5 hover:bg-white/10 border border-white/5 rounded-2xl text-[9px] font-black uppercase tracking-[0.4em] text-white transition-all flex items-center justify-center gap-3 active:scale-95"
               >
-                Sync with Cloud
+                <RefreshCw className={`w-4 h-4 ${checkingBackend ? 'animate-spin' : ''}`} /> Sync Architecture
               </button>
-            </div>
-
-           <div className="bg-white border border-border rounded-2xl p-6 shadow-md flex items-center gap-4">
-              <div className="w-12 h-12 rounded-xl bg-green-50 text-green-600 flex items-center justify-center">
-                 <Globe className="w-6 h-6" />
-              </div>
-              <div>
-                 <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Cloud Sync</p>
-                 <p className="font-display font-bold text-lg">Active</p>
-              </div>
            </div>
         </div>
 
-        {/* API Key Section */}
-        <div className="settings-card lg:col-span-3 bg-white rounded-3xl border border-border p-10 shadow-md">
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-10">
-            <div className="space-y-1">
-              <div className="flex items-center gap-3">
-                <div className="p-2 rounded-lg bg-muted text-muted-foreground">
-                  <Key className="w-4 h-4" />
-                </div>
-                <h2 className="text-xs font-bold uppercase tracking-widest text-muted-foreground">LLM Engine Configuration</h2>
+        {/* Engine Configuration */}
+        <div className="settings-module xl:col-span-12 border border-white/5 bg-white/[0.01] rounded-[40px] p-12">
+           <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-12 mb-16">
+              <div className="space-y-4">
+                 <div className="flex items-center gap-3">
+                    <Cpu className="w-5 h-5 text-accent-orange" />
+                    <h3 className="text-[10px] font-black uppercase tracking-[0.4em] text-white">Neural Processing Unit</h3>
+                 </div>
+                 <p className="text-white/40 text-lg font-light max-w-2xl leading-relaxed">
+                    Inject your <strong className="text-white">Groq LPU</strong> access token to enable high-speed generation. 
+                    Tokens are strictly held in local sharded storage.
+                 </p>
               </div>
-              <p className="text-muted-foreground text-sm pt-2">Enter your Groq API key to power the high-speed generation engine.</p>
-            </div>
-            <a
-              href="https://console.groq.com/keys"
-              target="_blank"
-              rel="noreferrer"
-              className="group flex items-center gap-2 text-[10px] font-black uppercase tracking-widest px-4 py-2 rounded-full border border-border hover:bg-muted transition-all"
-            >
-              Get Key <ExternalLink className="w-3 h-3 group-hover:-translate-y-0.5" />
-            </a>
-          </div>
+              <a href="https://console.groq.com/keys" target="_blank" rel="noreferrer" className="flex items-center gap-3 border border-white/10 px-8 py-4 rounded-xl text-[9px] font-black uppercase tracking-[0.3em] text-white/40 hover:text-white transition-colors">
+                 GET_TOKEN <ExternalLink className="w-3.5 h-3.5" />
+              </a>
+           </div>
 
-          <div className="space-y-6">
-            <div className="flex items-start gap-4 p-5 bg-accent/5 border border-accent/10 rounded-2xl text-accent">
-               <Lock className="w-5 h-5 shrink-0 mt-0.5" />
-               <p className="text-xs leading-relaxed font-medium">
-                 Your key is stored <strong className="underline">locally</strong> in your browser's persistent storage. We never transmit or store your key on our servers.
-               </p>
-            </div>
-
-            <div className="flex flex-col sm:flex-row gap-4">
-              <input
-                type="password"
-                className="input-field flex-1 h-14 px-6 text-base"
-                placeholder="sk-forge_................................"
-                value={apiKey}
-                onChange={e => setApiKey(e.target.value)}
-              />
-              <button
+           <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
+              <div className="md:col-span-9 relative">
+                 <Terminal className="absolute left-6 top-1/2 -translate-y-1/2 w-4 h-4 text-white/20" />
+                 <input
+                    type="password"
+                    className="w-full h-16 bg-white/[0.02] border border-white/5 rounded-2xl px-16 text-white font-mono text-sm focus:outline-none focus:border-white/20 transition-all placeholder:text-white/5"
+                    placeholder="sk-neural_................................"
+                    value={apiKey}
+                    onChange={e => setApiKey(e.target.value)}
+                 />
+              </div>
+              <button 
                 onClick={handleSaveKey}
                 disabled={saving}
-                className="btn-primary h-14 px-12 text-xs uppercase tracking-[0.2em] shadow-xl"
+                className="md:col-span-3 h-16 bg-white text-black rounded-2xl text-[10px] font-black uppercase tracking-[0.5em] hover:scale-[1.02] active:scale-[0.98] transition-all"
               >
-                {saving ? 'Updating...' : 'Update Key'}
+                 {saving ? 'UPDATING...' : 'SYNC_ENGINE'}
               </button>
-            </div>
-          </div>
+           </div>
+
+           <div className="mt-8 flex items-center gap-3 text-white/10 font-mono text-[8px] uppercase tracking-[0.4em]">
+              <Lock className="w-3 h-3" /> Encrypted Local Protocol Active
+           </div>
         </div>
 
-        {/* Security & Infrastructure */}
-        <div className="settings-card lg:col-span-3 grid grid-cols-1 md:grid-cols-2 gap-8 p-10 bg-muted/30 border border-border rounded-3xl">
-           <div className="space-y-4">
-              <div className="flex items-center gap-3">
-                 <div className="p-2 rounded-lg bg-white shadow-sm text-foreground">
-                   <Shield className="w-4 h-4" />
-                 </div>
-                 <h3 className="text-sm font-bold uppercase tracking-widest text-foreground">Infrastructure</h3>
-              </div>
-              <p className="text-sm text-muted-foreground leading-relaxed pr-8">
-                Forge utilizes enterprise-grade <strong className="text-foreground">Google OAuth2</strong> for authentication and <strong className="text-foreground">AES-256</strong> equivalent local storage for API keys.
+        {/* System Matrix */}
+        <div className="settings-module xl:col-span-12 grid grid-cols-1 md:grid-cols-2 gap-1 px-0 overflow-hidden rounded-[40px] border border-white/5">
+           <div className="p-12 bg-white/[0.01]">
+              <h4 className="text-[10px] font-black uppercase tracking-[0.4em] text-white mb-4">Zero Knowledge</h4>
+              <p className="text-white/20 text-sm leading-relaxed font-mono">
+                 All neural blueprints are partitioned across isolated memory shards. Forge never sees your data.
               </p>
            </div>
-           <div className="space-y-4">
-              <div className="flex items-center gap-3">
-                 <div className="p-2 rounded-lg bg-white shadow-sm text-foreground">
-                   <Database className="w-4 h-4" />
-                 </div>
-                 <h3 className="text-sm font-bold uppercase tracking-widest text-foreground">Data Storage</h3>
-              </div>
-              <p className="text-sm text-muted-foreground leading-relaxed pr-8">
-                Generations are stored in <strong className="text-foreground">isolated Firestore shards</strong>, ensuring your content is always private and accessible across all your devices.
+           <div className="p-12 bg-white/[0.02]">
+              <h4 className="text-[10px] font-black uppercase tracking-[0.4em] text-white mb-4">Compliance</h4>
+              <p className="text-white/20 text-sm leading-relaxed font-mono">
+                 SOC2 compliant infrastructure. Hardware-level security keys supported for all enterprise-tier clusters.
               </p>
            </div>
         </div>

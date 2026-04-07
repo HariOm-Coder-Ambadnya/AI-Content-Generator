@@ -1,21 +1,21 @@
 // src/pages/GeneratePage.jsx
 import { useState, useCallback, useRef } from 'react'
-import { Sparkles, ChevronDown, ChevronUp, StopCircle, Wand2, ArrowRight, Zap, Target, AlignLeft } from 'lucide-react'
+import { Sparkles, StopCircle, Wand2, Zap, Target, Layers, Cpu, Bookmark, Share2, CornerRightDown, Fingerprint, Activity, Box, Terminal, Database, Command } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { streamGenerateContent } from '../lib/groq'
 import { saveGeneration } from '../lib/firestore'
 import { useAuth } from '../hooks/useAuth'
-import ContentTypeCard, { CONTENT_TYPES } from '../components/ContentTypeCard'
+import { CONTENT_TYPES } from '../components/ContentTypeCard'
 import OutputPanel from '../components/OutputPanel'
 import toast from 'react-hot-toast'
 import gsap from 'gsap'
 import { useGSAP } from '@gsap/react'
 
 const TONES = [
-  { id: 'professional', label: 'Professional', emoji: '👔' },
-  { id: 'casual', label: 'Casual', emoji: '😊' },
-  { id: 'witty', label: 'Witty', emoji: '😏' },
-  { id: 'inspirational', label: 'Inspirational', emoji: '🔥' },
+  { id: 'professional', label: 'Professional' },
+  { id: 'casual', label: 'Casual' },
+  { id: 'witty', label: 'Witty' },
+  { id: 'inspirational', label: 'Inspirational' },
 ]
 
 const LENGTHS = [
@@ -32,8 +32,7 @@ export default function GeneratePage() {
   const [length, setLength] = useState('medium')
   const [audience, setAudience] = useState('')
   const [additionalContext, setAdditionalContext] = useState('')
-  const [showAdvanced, setShowAdvanced] = useState(false)
-
+  
   const [output, setOutput] = useState('')
   const [isGenerating, setIsGenerating] = useState(false)
   const [isSaving, setIsSaving] = useState(false)
@@ -43,11 +42,11 @@ export default function GeneratePage() {
 
   useGSAP(() => {
     gsap.from('.reveal-item', {
-      y: 20,
+      y: 40,
       opacity: 0,
       stagger: 0.1,
-      duration: 0.8,
-      ease: 'power3.out'
+      duration: 1.2,
+      ease: 'expo.out'
     })
   }, { scope: containerRef })
 
@@ -55,13 +54,13 @@ export default function GeneratePage() {
     if (abortControllerRef.current) {
       abortControllerRef.current.abort()
       setIsGenerating(false)
-      toast.error('Generation stopped.')
+      toast.error('Neural transmission interrupted.')
     }
   }
 
   const handleGenerate = useCallback(async () => {
     if (!topic.trim()) {
-      toast.error('Please enter a topic or brief.')
+      toast.error('Project briefing required.')
       return
     }
 
@@ -87,7 +86,7 @@ export default function GeneratePage() {
       }
     } catch (err) {
       if (err.name === 'AbortError') return
-      toast.error(err.message || 'Generation failed.')
+      toast.error(err.message || 'Quantum processing failed.')
     } finally {
       setIsGenerating(false)
       abortControllerRef.current = null
@@ -107,213 +106,199 @@ export default function GeneratePage() {
         output,
         wordCount: output.split(/\s+/).filter(Boolean).length,
       })
-      toast.success('Saved to history!')
+      toast.success('Archived to Cloud Memory')
     } catch (err) {
-      toast.error('Failed to save.')
+      toast.error('Vault synchronization failed.')
     } finally {
       setIsSaving(false)
     }
   }
 
-  const selectedType = CONTENT_TYPES.find(t => t.id === contentType)
-
   return (
-    <div ref={containerRef} className="max-w-5xl mx-auto w-full space-y-12 pb-32">
-      {/* Header Section */}
-      <div className="reveal-item space-y-4">
-        <div className="flex items-center gap-3 text-muted-foreground uppercase text-[10px] font-bold tracking-widest">
-           <Zap className="w-3 h-3 text-accent" />
-           <span>FORGE GENERATOR v2.0</span>
+    <div ref={containerRef} className="w-full min-h-screen bg-black text-white flex flex-col pt-24 lg:pt-12 pb-32 lg:pb-12 px-6 md:px-12 lg:pl-32">
+      
+      {/* HUD Header */}
+      <div className="reveal-item flex flex-col md:flex-row justify-between items-start md:items-end mb-20 gap-8">
+        <div className="space-y-4">
+           <div className="flex items-center gap-4">
+              <div className="w-10 h-[1px] bg-white/20" />
+              <span className="font-mono text-[9px] font-black uppercase tracking-[0.5em] text-white/30">Node_ID: US-EAST-1</span>
+           </div>
+           <h1 className="font-serif text-4xl md:text-8xl tracking-tighter leading-none">
+              Architect <span className="text-white/20">Content.</span>
+           </h1>
         </div>
-        <h1 className="font-display text-5xl font-bold tracking-tight text-foreground">
-          What are we <span className="text-accent underline decoration-accent/10">creating</span> today?
-        </h1>
-        <p className="text-muted-foreground text-lg max-w-2xl leading-relaxed">
-          Select a format, provide a few details, and watch our AI forge high-performance content for your brand.
-        </p>
+
+        <div className="flex items-center gap-12 md:gap-20 font-mono text-[8px] text-white/20 uppercase tracking-[0.5em]">
+           <div className="flex flex-col gap-1">
+              <span>Status</span>
+              <span className="text-white">Online</span>
+           </div>
+           <div className="flex flex-col gap-1">
+              <span>Latency</span>
+              <span className="text-white">12ms</span>
+           </div>
+        </div>
       </div>
 
-      {/* Grid: Type & Input */}
-      <div className="grid grid-cols-1 lg:grid-cols-1 gap-12">
-        <div className="space-y-10">
-          {/* Format Selection */}
-          <div className="reveal-item space-y-4">
-            <div className="flex items-center justify-between">
-              <label className="text-xs font-bold uppercase tracking-widest text-muted-foreground flex items-center gap-2">
-                <Target className="w-4 h-4" /> 1. CHOOSE FORMAT
-              </label>
-              <span className="text-[10px] text-muted-foreground/50">Pick a specialized AI engine</span>
-            </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-              {CONTENT_TYPES.map(type => (
-                <ContentTypeCard
-                  key={type.id}
-                  type={type}
-                  selected={contentType === type.id}
-                  onSelect={setContentType}
-                />
-              ))}
-            </div>
-          </div>
-
-          {/* Prompt Area */}
-          <div className="reveal-item space-y-4">
-            <label className="text-xs font-bold uppercase tracking-widest text-muted-foreground flex items-center gap-2">
-              <AlignLeft className="w-4 h-4" /> 2. PROVIDE CONTEXT
-            </label>
-            <div className="relative group">
-              <textarea
-                className="input-field min-h-[200px] bg-white text-lg p-8 shadow-md group-focus-within:shadow-xl transition-all leading-relaxed"
-                placeholder={
-                  contentType === 'blog' ? 'Enter the topic for your article...' :
-                  contentType === 'social' ? 'What should the caption be about?' :
-                  contentType === 'marketing' ? 'Describe the product or campaign...' :
-                  'What technical document or code should we generate?'
-                }
-                value={topic}
-                onChange={e => setTopic(e.target.value)}
-                onKeyDown={e => { if (e.key === 'Enter' && e.metaKey) handleGenerate() }}
-              />
-              <div className="absolute bottom-6 right-8 text-[10px] font-bold uppercase tracking-widest text-muted-foreground/30 pointer-events-none">
-                ⌘ + ENTER TO FORGE
+      <div className="grid grid-cols-1 xl:grid-cols-12 gap-12">
+        
+        {/* SIDEBAR CONFIG (3 cols) */}
+        <aside className="xl:col-span-3 space-y-12 reveal-item">
+           
+           {/* Archetype */}
+           <section className="space-y-6">
+              <div className="flex items-center gap-3 text-white/20">
+                 <Terminal className="w-3.5 h-3.5" />
+                 <h2 className="font-mono text-[9px] font-black uppercase tracking-[0.5em]">Archetype</h2>
               </div>
-            </div>
-          </div>
-
-          {/* Secondary Controls */}
-          <div className="reveal-item grid grid-cols-1 md:grid-cols-2 gap-8">
-             <div className="space-y-4">
-               <label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Select Tone</label>
-               <div className="grid grid-cols-2 gap-2">
-                 {TONES.map(t => (
-                   <button
-                     key={t.id}
-                     onClick={() => setTone(t.id)}
-                     className={`flex items-center gap-3 px-4 py-3 rounded-xl border text-sm font-medium transition-all ${
-                       tone === t.id 
-                       ? 'bg-black text-white border-black shadow-xl active:scale-[0.98]' 
-                       : 'bg-white text-foreground border-border hover:bg-muted'
-                     }`}
-                   >
-                     <span className="text-lg">{t.emoji}</span>
-                     {t.label}
-                   </button>
-                 ))}
-               </div>
-             </div>
-             
-             <div className="space-y-4">
-               <label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Desired Length</label>
-               <div className="flex flex-col gap-2">
-                  {LENGTHS.map(l => (
+              <div className="flex flex-col gap-2">
+                 {CONTENT_TYPES.map(type => (
                     <button
-                      key={l.id}
-                      onClick={() => setLength(l.id)}
-                      className={`flex items-center justify-between px-6 py-3 rounded-xl border text-sm font-medium transition-all ${
-                        length === l.id 
-                        ? 'bg-black text-white border-black shadow-xl active:scale-[0.98]' 
-                        : 'bg-white text-foreground border-border hover:bg-muted'
-                      }`}
+                       key={type.id}
+                       onClick={() => setContentType(type.id)}
+                       className={`w-full text-left px-5 py-4 rounded-xl font-mono text-[9px] font-black uppercase tracking-[0.2em] transition-all border ${
+                          contentType === type.id 
+                          ? 'bg-white text-black border-white shadow-[0_0_20px_rgba(255,255,255,0.05)]' 
+                          : 'bg-white/5 border-white/5 text-white/40 hover:bg-white/10'
+                       }`}
                     >
-                      <span className="uppercase tracking-tighter text-xs font-bold">{l.label}</span>
-                      <span className={`text-[10px] opacity-40`}>{l.hint}</span>
+                       {type.label}
                     </button>
-                  ))}
+                 ))}
+              </div>
+           </section>
+
+           {/* Tone */}
+           <section className="space-y-6">
+              <div className="flex items-center gap-3 text-white/20">
+                 <Target className="w-3.5 h-3.5" />
+                 <h2 className="font-mono text-[9px] font-black uppercase tracking-[0.5em]">Tone_Logic</h2>
+              </div>
+              <div className="flex flex-col gap-2">
+                 {TONES.map(t => (
+                    <button
+                       key={t.id}
+                       onClick={() => setTone(t.id)}
+                       className={`w-full text-left px-5 py-4 rounded-xl font-mono text-[9px] font-black uppercase tracking-[0.2em] transition-all border ${
+                          tone === t.id 
+                          ? 'bg-white text-black border-white shadow-[0_0_20px_rgba(255,255,255,0.05)]' 
+                          : 'bg-white/5 border-white/5 text-white/40 hover:bg-white/10'
+                       }`}
+                    >
+                       {t.label}
+                    </button>
+                 ))}
+              </div>
+           </section>
+
+           {/* Length */}
+           <section className="space-y-6">
+              <div className="flex items-center gap-3 text-white/20">
+                 <Layers className="w-3.5 h-3.5" />
+                 <h2 className="font-mono text-[9px] font-black uppercase tracking-[0.5em]">Span_Module</h2>
+              </div>
+              <div className="flex flex-col gap-2">
+                 {LENGTHS.map(l => (
+                    <button
+                       key={l.id}
+                       onClick={() => setLength(l.id)}
+                       className={`w-full text-left px-5 py-4 rounded-xl font-mono text-[9px] font-black uppercase tracking-[0.2em] transition-all border ${
+                          length === l.id 
+                          ? 'bg-white text-black border-white shadow-[0_0_20px_rgba(255,255,255,0.05)]' 
+                          : 'bg-white/5 border-white/5 text-white/40 hover:bg-white/10'
+                       }`}
+                    >
+                       {l.label}
+                    </button>
+                 ))}
+              </div>
+           </section>
+
+        </aside>
+
+        {/* MAIN WORKSPACE (9 cols) */}
+        <main className="xl:col-span-9 space-y-12">
+            
+            {/* Briefing Area */}
+            <section className="reveal-item space-y-6">
+               <div className="flex items-center gap-3 text-white/20">
+                  <Database className="w-3.5 h-3.5" />
+                  <h2 className="font-mono text-[9px] font-black uppercase tracking-[0.5em]">System_Briefing</h2>
                </div>
-             </div>
-          </div>
-
-          {/* Advanced Dropdown */}
-          <div className="reveal-item pt-4">
-            <button
-              onClick={() => setShowAdvanced(!showAdvanced)}
-              className="group mx-auto flex flex-col items-center gap-2 text-[10px] font-bold uppercase tracking-[0.3em] text-muted-foreground/40 hover:text-foreground transition-all"
-            >
-              <span>{showAdvanced ? 'Simplify Context' : 'Advanced Configuration'}</span>
-              <div className="w-8 h-[1px] bg-border group-hover:w-16 transition-all" />
-            </button>
-
-            <AnimatePresence>
-              {showAdvanced && (
-                <motion.div
-                  initial={{ height: 0, opacity: 0 }}
-                  animate={{ height: 'auto', opacity: 1 }}
-                  exit={{ height: 0, opacity: 0 }}
-                  className="overflow-hidden mt-8"
-                >
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6 p-8 bg-muted/30 border border-border rounded-2xl">
-                    <div className="space-y-2">
-                      <label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Target Audience</label>
-                      <input
-                        type="text"
-                        className="input-field h-12 bg-white"
-                        placeholder="e.g. Content Marketers, Developers..."
-                        value={audience}
-                        onChange={e => setAudience(e.target.value)}
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Additional Context</label>
-                      <input
-                        type="text"
-                        className="input-field h-12 bg-white"
-                        placeholder="e.g. Mention our new features..."
-                        value={additionalContext}
-                        onChange={e => setAdditionalContext(e.target.value)}
-                      />
-                    </div>
+               <div className="relative">
+                  <textarea
+                    className="w-full min-h-[240px] bg-white/[0.03] border border-white/5 rounded-[40px] p-10 text-2xl font-light text-white focus:outline-none focus:border-white/10 transition-all placeholder:text-white/5"
+                    placeholder="Input protocol parameters..."
+                    value={topic}
+                    onChange={e => setTopic(e.target.value)}
+                  />
+                  <div className="absolute bottom-10 right-12 flex items-center gap-4">
+                     {isGenerating ? (
+                        <button onClick={handleStop} className="flex items-center gap-3 font-mono text-[9px] font-black uppercase tracking-[0.3em] text-red-500 bg-red-500/5 px-6 py-3 rounded-xl border border-red-500/20 hover:bg-red-500/10 transition-all">
+                           <StopCircle className="w-4 h-4" /> Abort_Sequence
+                        </button>
+                     ) : (
+                        <button 
+                           onClick={handleGenerate}
+                           disabled={!topic.trim()}
+                           className="flex items-center gap-3 font-mono text-[9px] font-black uppercase tracking-[0.3em] text-black bg-white px-10 py-5 rounded-2xl hover:scale-105 transition-all shadow-[0_20px_40px_rgba(255,255,255,0.1)] disabled:opacity-20"
+                        >
+                           <Zap className="w-4 h-4" /> Forge_Sequence
+                        </button>
+                     )}
                   </div>
-                </motion.div>
-              )}
-            </AnimatePresence>
-          </div>
-        </div>
-      </div>
+               </div>
+            </section>
 
-      {/* Generation Bar (Sticky) */}
-      <div className="sticky bottom-10 z-[30] flex justify-center w-full reveal-item pointer-events-none">
-        <div className="pointer-events-auto w-full max-w-sm">
-          {isGenerating ? (
-            <button
-              onClick={handleStop}
-              className="w-full flex items-center justify-center gap-3 py-5 rounded-full bg-red-50 text-red-600 border border-red-100 font-bold uppercase text-xs tracking-widest shadow-xl hover:bg-red-100 transition-all"
-            >
-              <StopCircle className="w-5 h-5 animate-pulse" />
-              Abort Forging
-            </button>
-          ) : (
-            <button
-              onClick={handleGenerate}
-              disabled={!topic.trim()}
-              className="w-full group flex items-center justify-center gap-4 py-5 rounded-full bg-black text-white font-bold uppercase text-xs tracking-[0.2em] shadow-xl hover:shadow-[0_20px_40px_rgba(0,0,0,0.15)] hover:-translate-y-1 transition-all disabled:opacity-20 disabled:grayscale"
-            >
-              <Sparkles className="w-5 h-5" />
-              Forge Content
-              <ArrowRight className="w-5 h-5 opacity-40 group-hover:translate-x-1 group-hover:opacity-100 transition-all" />
-            </button>
-          )}
-        </div>
-      </div>
+            {/* Output Panel / Generated Content */}
+            <section className="reveal-item space-y-8 min-h-[500px]">
+               <div className="flex items-center gap-3 text-white/20">
+                  <Command className="w-3.5 h-3.5" />
+                  <h2 className="font-mono text-[9px] font-black uppercase tracking-[0.5em]">Output_Buffer</h2>
+               </div>
+               
+               <AnimatePresence mode="wait">
+                  {output || isGenerating ? (
+                     <motion.div
+                        key="output"
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        className="w-full"
+                     >
+                        <OutputPanel
+                           content={output}
+                           isStreaming={isGenerating}
+                           onRegenerate={handleGenerate}
+                           onSave={handleSave}
+                           isSaving={isSaving}
+                        />
+                        
+                        {/* Technical Meta Footer */}
+                        <div className="mt-8 flex justify-between items-center font-mono text-[8px] text-white/10 uppercase tracking-[0.4em] px-8">
+                           <div className="flex items-center gap-4">
+                              <span className={`w-1.5 h-1.5 rounded-full ${isGenerating ? 'bg-white animate-pulse' : 'bg-white/20'}`} />
+                              {isGenerating ? 'STREAMING_ENCODED_DATA' : 'STREAMS_STABLE'}
+                           </div>
+                           <div className="flex gap-12">
+                              <span>CHKSUM: {Math.random().toString(36).substring(7).toUpperCase()}</span>
+                              <span>TYPE: {contentType.toUpperCase()}</span>
+                           </div>
+                        </div>
+                     </motion.div>
+                  ) : (
+                     <div key="placeholder" className="w-full h-96 flex flex-col items-center justify-center border border-white/5 rounded-[48px] bg-white/[0.01]">
+                        <div className="w-16 h-16 rounded-full border border-white/5 flex items-center justify-center mb-8 opacity-20">
+                           <Wand2 className="w-6 h-6" />
+                        </div>
+                        <p className="font-mono text-[9px] font-black uppercase tracking-[0.6em] text-white/10">Awaiting_Neural_Ping</p>
+                     </div>
+                  )}
+               </AnimatePresence>
+            </section>
 
-      {/* Output Result */}
-      <AnimatePresence>
-        {(output || isGenerating) && (
-          <motion.div
-            initial={{ opacity: 0, y: 40 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.95 }}
-            className="reveal-item"
-          >
-            <OutputPanel
-              content={output}
-              isStreaming={isGenerating && !output}
-              onRegenerate={handleGenerate}
-              onSave={handleSave}
-              isSaving={isSaving}
-            />
-          </motion.div>
-        )}
-      </AnimatePresence>
+        </main>
+      </div>
     </div>
   )
 }

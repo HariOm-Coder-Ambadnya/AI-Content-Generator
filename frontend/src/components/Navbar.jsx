@@ -1,103 +1,91 @@
 // src/components/Navbar.jsx
 import { NavLink, Link } from 'react-router-dom'
-import { Zap, History, Settings, LogOut, LayoutDashboard, User } from 'lucide-react'
+import { Zap, History, Settings, LogOut, LayoutDashboard, Terminal, Activity } from 'lucide-react'
 import { logOut } from '../lib/firebase'
 import { useAuth } from '../hooks/useAuth'
 import toast from 'react-hot-toast'
 import { motion } from 'framer-motion'
-import { useRef } from 'react'
-import gsap from 'gsap'
-import { useGSAP } from '@gsap/react'
 
 const NAV = [
-  { to: '/app', icon: LayoutDashboard, label: 'Generator', end: true },
-  { to: '/app/history', icon: History, label: 'History' },
-  { to: '/app/settings', icon: Settings, label: 'Settings' },
+  { to: '/app', icon: Terminal, label: 'Workspace', end: true },
+  { to: '/app/history', icon: History, label: 'Vault' },
+  { to: '/app/settings', icon: Settings, label: 'Config' },
 ]
 
 export default function Navbar() {
   const user = useAuth()
-  const navRef = useRef(null)
 
   const handleLogout = async () => {
     try {
       await logOut()
-      toast.success('Signed out successfully')
+      toast.success('Protocol terminated.')
     } catch (err) {
       toast.error('Sign out failed')
     }
   }
 
-  useGSAP(() => {
-     gsap.from('.nav-link', { 
-       opacity: 0, 
-       y: -10, 
-       stagger: 0.1, 
-       duration: 0.6, 
-       ease: 'power2.out' 
-     })
-  }, { scope: navRef })
-
   return (
-    <nav ref={navRef} className="h-16 border-b border-border bg-white/80 backdrop-blur-md sticky top-0 z-[100] flex items-center">
-      <div className="max-w-7xl mx-auto px-6 w-full flex justify-between items-center">
-        {/* Logo */}
-        <Link to="/app" className="flex items-center gap-2 group nav-link">
-          <div className="w-8 h-8 rounded-lg bg-black flex items-center justify-center shadow-md group-hover:scale-105 transition-transform">
-            <Zap className="w-4 h-4 text-white fill-white" />
-          </div>
-          <span className="font-display font-black text-lg tracking-tight uppercase">Forge</span>
-        </Link>
+    <nav className="h-20 border-b border-white/5 bg-black sticky top-0 z-[100] flex items-center px-4 md:px-8">
+      <div className="w-full flex justify-between items-center">
         
-        {/* Navigation */}
-        <div className="hidden md:flex items-center gap-2">
-          {NAV.map(({ to, icon: Icon, label, end }) => (
-            <NavLink
-              key={to}
-              to={to}
-              end={end}
-              className={({ isActive }) =>
-                `nav-link relative flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-all duration-300 ${isActive
-                  ? 'text-black bg-muted'
-                  : 'text-muted-foreground hover:text-black hover:bg-muted/50'
-                }`
-              }
-            >
-              {({ isActive }) => (
-                <>
-                  <Icon className={`w-4 h-4 transition-colors duration-300 ${isActive ? 'text-accent' : ''}`} />
-                  <span>{label}</span>
-                  {isActive && (
-                    <motion.div
-                      layoutId="activeTab"
-                      className="absolute inset-0 bg-muted rounded-full -z-10"
-                      transition={{ type: 'spring', bounce: 0.2, duration: 0.6 }}
-                    />
-                  )}
-                </>
-              )}
-            </NavLink>
-          ))}
+        {/* Brand */}
+        <div className="flex items-center gap-12">
+          <Link to="/" className="flex items-center gap-4 group">
+            <div className="w-10 h-10 rounded-xl bg-white flex items-center justify-center transition-transform group-hover:scale-110">
+              <Zap className="w-5 h-5 text-black fill-black" />
+            </div>
+            <div className="flex flex-col">
+              <span className="font-serif text-xl tracking-tighter text-white leading-none">Forge</span>
+              <span className="font-mono text-[8px] font-black uppercase tracking-[0.4em] text-white/20 mt-1">FORGE_CORE_v3.2</span>
+            </div>
+          </Link>
+
+          {/* Navigation */}
+          <div className="hidden lg:flex items-center gap-4">
+            {NAV.map(({ to, icon: Icon, label, end }) => (
+              <NavLink
+                key={to}
+                to={to}
+                end={end}
+                className={({ isActive }) =>
+                  `flex items-center gap-3 px-6 py-2.5 rounded-xl font-mono text-[9px] font-black uppercase tracking-[0.2em] transition-all border ${isActive
+                    ? 'text-white border-white/20 bg-white/5 shadow-[0_0_20px_rgba(255,255,255,0.05)]'
+                    : 'text-white/30 border-transparent hover:text-white hover:bg-white/5'
+                  }`
+                }
+              >
+                <Icon className="w-3.5 h-3.5" />
+                <span>{label}</span>
+              </NavLink>
+            ))}
+          </div>
         </div>
 
-        {/* User Actions */}
-        <div className="flex items-center gap-4 nav-link">
-          <div className="hidden sm:flex items-center gap-3 px-3 py-1.5 rounded-full border border-border bg-muted/50">
+        {/* System HUD */}
+        <div className="flex items-center gap-8">
+          
+          <div className="hidden md:flex items-center gap-6 px-5 py-2.5 rounded-xl border border-white/5 bg-white/[0.02]">
+            <div className="flex flex-col items-end">
+               <span className="font-mono text-[8px] font-black uppercase tracking-[0.2em] text-white/60">{user?.displayName?.split(' ')[0] || 'Operator'}</span>
+               <div className="flex items-center gap-2">
+                  <span className="w-1 h-1 rounded-full bg-accent-orange animate-pulse" />
+                  <span className="font-mono text-[7px] text-white/20 uppercase tracking-[0.2em]">Active</span>
+               </div>
+            </div>
             <img
               src={user?.photoURL || `https://api.dicebear.com/8.x/initials/svg?seed=${user?.email}`}
               alt="avatar"
-              className="w-6 h-6 rounded-full object-cover ring-1 ring-white/5"
+              className="w-8 h-8 rounded-lg object-cover border border-white/10"
             />
-            <span className="text-xs font-semibold text-foreground/80">{user?.displayName?.split(' ')[0] || 'User'}</span>
           </div>
 
           <button
             onClick={handleLogout}
-            className="p-2 rounded-full text-muted-foreground hover:text-red-500 hover:bg-red-50 transition-all active:scale-90"
-            title="Sign out"
+            className="p-3 rounded-xl border border-white/5 text-white/20 hover:text-red-500 hover:bg-red-500/5 transition-all group"
           >
-            <LogOut className="w-5 h-5" />
+            <LogOut className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
           </button>
+
         </div>
       </div>
     </nav>
