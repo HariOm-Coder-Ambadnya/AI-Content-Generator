@@ -10,5 +10,16 @@ export default defineConfig({
         changeOrigin: true
       }
     }
+  },
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          'vendor-heavy': ['three', 'postprocessing', 'face-api.js'],
+          'vendor-ui': ['framer-motion', 'gsap', 'react-router-dom', 'react', 'react-dom']
+        }
+      }
+    },
+    chunkSizeWarningLimit: 1000
   }
 })
