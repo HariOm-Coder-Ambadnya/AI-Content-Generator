@@ -15,7 +15,7 @@ export default defineConfig({
     rollupOptions: {
       output: {
         manualChunks: {
-          'vendor-heavy': ['three', 'postprocessing', 'face-api.js'],
+          'vendor-heavy': ['three', 'postprocessing'],
           'vendor-ui': ['framer-motion', 'gsap', 'react-router-dom', 'react', 'react-dom']
         }
       }
