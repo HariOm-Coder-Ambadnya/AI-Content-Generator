@@ -1,68 +1,13 @@
-// src/pages/LoginPage.jsx
-import { useState, useRef, useEffect } from 'react'
-import { motion, useScroll, useTransform, useSpring } from 'framer-motion'
+import { useState } from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
 import { signInWithGoogle } from '../lib/firebase'
-import { Zap, ArrowRight, ShieldCheck, Cpu, Terminal, Layers, Box, Fingerprint, Activity, Workflow, ChevronRight, Binary, Database, Network } from 'lucide-react'
-import ShapeGrid from '../components/ShapeGrid'
-import gsap from 'gsap'
-import { ScrollTrigger } from 'gsap/ScrollTrigger'
-import { useGSAP } from '@gsap/react'
-
-gsap.registerPlugin(ScrollTrigger);
-
-const FeatureCard = ({ icon: Icon, title, desc, delay }) => (
-  <motion.div 
-    initial={{ opacity: 0, y: 30 }}
-    whileInView={{ opacity: 1, y: 0 }}
-    viewport={{ once: true }}
-    transition={{ duration: 0.8, delay, ease: [0.23, 1, 0.32, 1] }}
-    className="p-10 rounded-[40px] bg-white/[0.02] border border-white/5 hover:border-white/10 transition-all group"
-  >
-    <div className="w-14 h-14 rounded-2xl bg-white/5 flex items-center justify-center mb-8 border border-white/5 group-hover:scale-110 transition-transform">
-      <Icon className="w-6 h-6 text-white" />
-    </div>
-    <h3 className="font-mono text-[10px] font-black uppercase tracking-[0.5em] text-white/40 mb-4">{title}</h3>
-    <p className="text-white text-2xl font-light leading-relaxed">{desc}</p>
-  </motion.div>
-)
+import { ArrowRight, Globe, TrendingUp, Cpu, Rocket } from 'lucide-react'
+import Logo from '../components/Logo'
+import { GridScan } from '../components/GridScan'
 
 export default function LoginPage() {
   const [loading, setLoading] = useState(false)
-  const containerRef = useRef(null)
-  const heroRef = useRef(null)
-  
-  const { scrollYProgress } = useScroll({
-    target: containerRef,
-    offset: ["start start", "end end"]
-  });
-
-  useGSAP(() => {
-    // Scrolling text reveal similar to DatologyAI
-    const words = document.querySelectorAll('.reveal-word');
-    words.forEach(word => {
-      gsap.from(word, {
-        scrollTrigger: {
-          trigger: word,
-          start: 'top 85%',
-          end: 'top 60%',
-          scrub: true,
-        },
-        opacity: 0.1,
-        y: 20,
-        filter: 'blur(10px)',
-      });
-    });
-
-    // Hero content reveal
-    gsap.from('.hero-content', {
-      opacity: 0,
-      y: 60,
-      duration: 2,
-      ease: 'expo.out',
-      stagger: 0.2,
-      delay: 0.5
-    });
-  }, { scope: containerRef });
+  const [isEntryStarted, setIsEntryStarted] = useState(false)
 
   const handleLogin = async () => {
     setLoading(true)
@@ -75,186 +20,138 @@ export default function LoginPage() {
   }
 
   return (
-    <div ref={containerRef} className="relative min-h-screen w-full bg-black text-white overflow-x-hidden selection:bg-white selection:text-black">
+    <div className="relative min-h-screen w-full bg-primary text-white overflow-hidden selection:bg-accent selection:text-black">
       
-      {/* Background Grid */}
-      <div className="fixed inset-0 z-0 pointer-events-none opacity-40">
-        <ShapeGrid 
-          borderColor="#222" 
-          hoverFillColor="#333" 
-          squareSize={50} 
-          speed={0.4} 
-          hoverTrailAmount={10}
+      {/* Background Architecture */}
+      <div className="absolute inset-0 z-0">
+        <GridScan 
+          scanColor="#22C55E"
+          linesColor="#1F2937"
+          gridScale={0.15}
+          scanOpacity={0.6}
+          scanDuration={3}
+          bloomIntensity={0.8}
         />
       </div>
-
-      {/* Navigation */}
-      <nav className="fixed top-0 left-0 right-0 z-[100] h-20 md:h-32 flex items-center justify-center px-6 md:px-12 pointer-events-none">
-        <div className="w-full max-w-7xl flex justify-between items-center pointer-events-auto">
-          <div className="flex items-center gap-4 group">
-            <div className="w-12 h-12 rounded-2xl bg-white flex items-center justify-center shadow-2xl transition-transform group-hover:scale-110">
-              <Zap className="w-6 h-6 text-black fill-black" />
-            </div>
-            <span className="font-mono text-[9px] font-black uppercase tracking-[0.5em]">Forge_OS</span>
-          </div>
-
-          <div className="hidden md:flex items-center gap-16 font-mono text-[8px] font-black uppercase tracking-[0.4em] text-white/30">
-            <a href="#architecture" className="hover:text-white transition-colors">Architecture</a>
-            <a href="#neural" className="hover:text-white transition-colors">Neural_Engine</a>
-            <a href="#intelligence" className="hover:text-white transition-colors">Intelligence</a>
-          </div>
-
-          <button 
-            onClick={handleLogin}
-            className="px-10 py-4 rounded-xl bg-white text-black font-mono text-[9px] font-black uppercase tracking-[0.5em] hover:scale-105 active:scale-95 transition-all shadow-2xl"
+      <div className="noise-bg opacity-[0.05] pointer-events-none" />
+      
+      <AnimatePresence mode="wait">
+        {!isEntryStarted ? (
+          <motion.div 
+            key="gate"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0, scale: 1.1, filter: 'blur(50px)' }}
+            transition={{ duration: 1.5, ease: [0.23, 1, 0.32, 1] }}
+            className="fixed inset-0 z-[200] flex flex-col items-center justify-center bg-primary/80 backdrop-blur-md"
           >
-            {loading ? 'INITIALIZING...' : 'ACCESS_SYSTEM'}
-          </button>
-        </div>
-      </nav>
+            <motion.div
+              initial={{ y: 30, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              transition={{ delay: 0.3, duration: 1 }}
+              className="space-y-16 text-center"
+            >
+              <div className="flex flex-col items-center gap-6">
+                <Logo className="scale-[3.5] text-accent" />
+                <p className="text-[10px] font-black uppercase tracking-[0.8em] text-white/40 mt-12">System_Initialization_Protocol</p>
+              </div>
 
-      {/* Hero Section */}
-      <main className="relative z-10 w-full">
-        <section ref={heroRef} className="h-screen flex flex-col items-center justify-center text-center px-8">
-           <motion.div
-             initial={{ opacity: 0, y: 20 }}
-             animate={{ opacity: 1, y: 0 }}
-             className="inline-flex items-center gap-4 px-6 py-3 rounded-2xl border border-white/5 bg-white/[0.02] mb-16 hero-content"
-           >
-              <div className="w-2 h-2 rounded-full bg-white animate-pulse" />
-              <span className="font-mono text-[8px] font-black uppercase tracking-[0.5em] text-white/40 italic">CORE_STABLE_V3.4_DEPLOYED</span>
-           </motion.div>
+              <button 
+                onClick={() => setIsEntryStarted(true)}
+                className="group relative px-12 py-5 bg-transparent border border-accent overflow-hidden transition-all hover:bg-accent active:scale-95"
+              >
+                <div className="absolute inset-0 bg-accent/10 translate-y-full transition-transform group-hover:translate-y-0" />
+                <span className="relative z-10 text-[11px] font-black uppercase tracking-[0.4em] text-accent group-hover:text-black">
+                  Access Growth Engine
+                </span>
+              </button>
+            </motion.div>
+          </motion.div>
+        ) : (
+          <motion.div 
+            key="main"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 1.5 }}
+            className="relative z-10 w-full min-h-screen flex flex-col"
+          >
+            {/* Minimal Top Nav */}
+            <nav className="px-8 md:px-16 py-10 flex justify-between items-center relative z-20">
+              <Logo className="text-accent" />
+              <div className="flex items-center gap-12">
+                 <div className="hidden lg:flex items-center gap-10 text-[10px] font-black uppercase tracking-[0.3em] opacity-40">
+                    <span className="hover:text-accent transition-colors cursor-pointer">Intelligence</span>
+                    <span className="hover:text-accent transition-colors cursor-pointer">Protocols</span>
+                 </div>
+                 <button 
+                   onClick={handleLogin}
+                   className="text-[10px] font-black uppercase tracking-[0.4em] px-8 py-4 border border-accent/20 bg-surface/50 backdrop-blur-xl rounded-full hover:bg-accent hover:text-black hover:border-accent transition-all"
+                 >
+                   {loading ? 'Powering Up' : 'Join the Collective'}
+                 </button>
+              </div>
+            </nav>
 
-           <h1 className="hero-content font-serif text-6xl md:text-[11vw] lg:text-[140px] leading-[0.8] tracking-[-0.05em] mb-16 max-w-5xl">
-             Engineer <br />
-             <span className="text-white/20 italic">Intelligence.</span>
-           </h1>
-
-           <p className="hero-content text-white/40 text-2xl lg:text-3xl font-light max-w-2xl leading-relaxed mb-16 mx-auto">
-             A sovereign neural architecture designed for high-performance context processing and content generation.
-           </p>
-
-           <button 
-             onClick={handleLogin}
-             className="hero-content px-16 py-8 rounded-[30px] bg-white text-black font-mono text-[10px] font-black uppercase tracking-[0.6em] hover:scale-105 transition-all shadow-[0_30px_60px_rgba(255,255,255,0.15)] flex items-center gap-6 group"
-           >
-             Initialize Protocol
-             <ArrowRight className="w-5 h-5 group-hover:translate-x-3 transition-transform" />
-           </button>
-        </section>
-
-        {/* Vision Section (DatologyAI Style) */}
-        <section className="min-h-screen py-32 md:py-64 px-6 md:px-12 flex flex-col items-center justify-center max-w-7xl mx-auto">
-           <div className="space-y-12 max-w-6xl text-center md:text-left">
-              {[
-                "Most AI systems are generic.",
-                "They recycle outputs, lack precision,",
-                "and operate within restricted bounds.",
-                "Forge is designed to break that.",
-                "It’s not just a generator—it’s an OS.",
-                "Built to synthesize complex contexts",
-                "into pure, engineered intelligence.",
-                "Unrestricted. High-performance. Sovereign."
-              ].map((line, i) => (
-                <h2 key={i} className="reveal-word font-serif text-5xl md:text-8xl lg:text-9xl leading-[0.9] tracking-tighter">
-                  {line}
-                </h2>
-              ))}
-           </div>
-        </section>
-
-        {/* Product Details Grid */}
-        <section id="architecture" className="py-32 md:py-64 px-6 md:px-12 max-w-7xl mx-auto space-y-32">
-           <div className="flex flex-col md:flex-row justify-between items-end gap-12">
-              <div className="space-y-6">
-                <div className="flex items-center gap-4">
-                  <div className="w-8 h-[1px] bg-white/20" />
-                  <span className="font-mono text-[8px] font-black uppercase tracking-[0.6em] text-white/30">SYSTEM_COMPONENTS</span>
+            <main className="flex-1 flex flex-col items-center justify-center px-8 text-center sm:pb-20">
+              
+              <motion.div
+                initial={{ y: 60, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                transition={{ delay: 0.5, duration: 1.2, ease: [0.23, 1, 0.32, 1] }}
+                className="space-y-16 max-w-6xl"
+              >
+                <div className="space-y-4">
+                  <span className="text-[10px] font-black uppercase tracking-[0.5em] text-accent opacity-60">Architecting Modern Influence</span>
+                  <h1 className="text-[clamp(3.5rem,14vw,10rem)] font-extrabold leading-[0.85] tracking-tighter text-white">
+                    Create <span className="italic text-accent">Faster.</span> <br />
+                    Grow <span className="text-accent">Smarter.</span>
+                  </h1>
                 </div>
-                <h2 className="font-serif text-7xl md:text-9xl tracking-tighter">Neural <span className="text-white/20">Blueprints.</span></h2>
-              </div>
-              <p className="text-white/40 text-xl font-light max-w-md leading-relaxed">
-                The underlying framework is built on localized neural sharding and real-time synaptic calibration.
-              </p>
-           </div>
 
-           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-              <FeatureCard 
-                icon={Cpu}
-                title="LPU_Optimization"
-                desc="Proprietary LPU (Language Processing Unit) integration for 500+ tok/s generation speed."
-                delay={0.1}
-              />
-              <FeatureCard 
-                icon={Fingerprint}
-                title="Sovereign_Identity"
-                desc="Quantum-encrypted authentication through isolated Firebase instances and local keys."
-                delay={0.2}
-              />
-              <FeatureCard 
-                icon={Activity}
-                title="Live_Calbiration"
-                desc="Real-time status tracking with zero-latency buffer synchronization across nodes."
-                delay={0.3}
-              />
-              <FeatureCard 
-                icon={Binary}
-                title="Context_Synthesis"
-                desc="Advanced multidimensional context analysis for higher accuracy in technical domains."
-                delay={0.4}
-              />
-              <FeatureCard 
-                icon={Database}
-                title="Cloud_Memories"
-                desc="Secure archiving with AES-256 sharding across high-performance regional clusters."
-                delay={0.5}
-              />
-              <FeatureCard 
-                icon={Network}
-                title="Neural_Mesh"
-                desc="Interconnected processing units that learn from your archetype configuration patterns."
-                delay={0.6}
-              />
-           </div>
-        </section>
+                <div className="space-y-8 max-w-2xl mx-auto">
+                   <p className="text-sm md:text-lg text-[#8B949E] font-medium leading-[1.6] opacity-80 uppercase tracking-[0.1em]">
+                      The definitive toolkit for high-velocity content <br /> and algorithmic scale.
+                   </p>
+                </div>
 
-        {/* Footer */}
-        <footer className="py-32 px-12 border-t border-white/5 bg-white/[0.01]">
-           <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-24">
-              <div className="lg:col-span-6 space-y-12">
-                 <div className="flex items-center gap-4">
-                    <div className="w-10 h-10 rounded-xl bg-white flex items-center justify-center">
-                       <Zap className="w-5 h-5 text-black fill-black" />
-                    </div>
-                    <span className="font-mono text-[10px] font-black uppercase tracking-[0.5em]">Forge</span>
-                 </div>
-                 <p className="text-white/20 text-sm font-mono max-w-sm uppercase tracking-widest leading-relaxed">
-                    Designed for heavy-duty content engineering. Built on the edge of innovation. 2026.
-                 </p>
-              </div>
+                <div className="flex flex-col sm:flex-row items-center justify-center gap-8 pt-6">
+                  <button 
+                    onClick={handleLogin}
+                    className="w-full sm:w-auto px-12 py-6 bg-accent text-black font-black uppercase tracking-[0.2em] text-xs hover:bg-white transition-all hover:shadow-[0_0_40px_rgba(34,197,94,0.3)] flex items-center justify-center gap-6 group"
+                  >
+                    {loading ? 'Syncing...' : 'Initiate Sequence'}
+                    <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-2" />
+                  </button>
+                  <button className="text-[10px] font-black uppercase tracking-[0.4em] opacity-30 hover:opacity-100 transition-opacity">
+                    View Network Stats
+                  </button>
+                </div>
+              </motion.div>
+            </main>
 
-              <div className="lg:col-span-6 grid grid-cols-2 lg:grid-cols-3 gap-16 font-mono text-[8px] font-black uppercase tracking-[0.5em] text-white/30">
-                 <div className="space-y-8 text-right lg:text-left">
-                    <p className="text-white">Social</p>
-                    <a href="#" className="block hover:text-white transition-colors">X_Protocol</a>
-                    <a href="#" className="block hover:text-white transition-colors">Network</a>
-                 </div>
-                 <div className="space-y-8 text-right lg:text-left">
-                    <p className="text-white">Security</p>
-                    <a href="#" className="block hover:text-white transition-colors">Compliance</a>
-                    <a href="#" className="block hover:text-white transition-colors">Legal_Doc</a>
-                 </div>
-                 <div className="space-y-8 text-right lg:text-left">
-                    <p className="text-white">Status</p>
-                    <div className="flex items-center justify-end lg:justify-start gap-3">
-                       <div className="w-2 h-2 rounded-full bg-white animate-pulse" />
-                       <span className="text-white">Core_Live</span>
-                    </div>
-                 </div>
-              </div>
-           </div>
-        </footer>
-      </main>
+            {/* Sub-Footer Architecture */}
+            <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-[#0D1117] to-transparent pointer-events-none" />
+            
+            <footer className="px-8 md:px-16 py-12 flex flex-col sm:flex-row justify-between items-center gap-8 relative z-20 border-t border-white/5 bg-[#0D1117]/40 backdrop-blur-md">
+               <div className="flex gap-12 text-[9px] font-black uppercase tracking-[0.3em] opacity-40">
+                  <span className="flex items-center gap-3"><TrendingUp className="w-3.5 h-3.5" /> High-Density Scale</span>
+                  <span className="flex items-center gap-3"><Rocket className="w-3.5 h-3.5" /> Neural Synthesis</span>
+                  <span className="flex items-center gap-3"><Cpu className="w-3.5 h-3.5" /> Core Engine v2</span>
+               </div>
+               <div className="flex items-center gap-6 opacity-30">
+                  <div className="w-8 h-[1px] bg-white" />
+                  <p className="text-[9px] font-black uppercase tracking-[0.4em]">FORGE // PROTOCOL // 2026</p>
+               </div>
+            </footer>
+
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   )
 }
+
+
+
+
+

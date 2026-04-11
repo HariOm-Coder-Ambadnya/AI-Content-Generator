@@ -1,7 +1,6 @@
-// src/components/LoadingScreen.jsx
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Cpu, Network, Shield, Zap, Database, Activity, Command, Terminal, Layers } from 'lucide-react'
+import { Cpu, Network, Shield, Zap, Database, Activity } from 'lucide-react'
 
 const LOADING_PHASES = [
   { text: "INITIALIZING_SYSTEM_CORE_V3", icon: Cpu },
@@ -16,7 +15,7 @@ export default function LoadingScreen({ onComplete }) {
   const [phaseIndex, setPhaseIndex] = useState(0)
 
   useEffect(() => {
-    const duration = 2400 
+    const duration = 2800 
     const interval = 20
     const increment = 100 / (duration / interval)
 
@@ -40,42 +39,62 @@ export default function LoadingScreen({ onComplete }) {
   return (
     <motion.div 
       initial={{ opacity: 1 }}
-      exit={{ opacity: 0, scale: 1.05, filter: 'blur(20px)' }}
+      exit={{ opacity: 0, scale: 1.05, filter: 'blur(30px)' }}
       transition={{ duration: 0.8, ease: [0.23, 1, 0.32, 1] }}
-      className="fixed inset-0 z-[1000] bg-black flex flex-col items-center justify-center overflow-hidden select-none"
+      className="fixed inset-0 z-[1000] bg-[#0D1117] flex flex-col items-center justify-center overflow-hidden select-none"
     >
-      <div className="noise-bg opacity-10" />
+      <div className="absolute inset-0 noise-bg opacity-[0.05] pointer-events-none" />
       
-      <div className="relative z-10 w-full max-w-sm space-y-12">
+      {/* Dynamic Background Number */}
+      <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+          <motion.h1 
+            className="text-[30vw] font-black text-white/5 tabular-nums leading-none tracking-tighter"
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+          >
+            {Math.round(progress)}
+          </motion.h1>
+      </div>
+
+      <div className="relative z-10 w-full max-w-sm space-y-16">
         
         {/* Core Icon Cluster */}
-        <div className="flex flex-col items-center gap-6">
+        <div className="flex flex-col items-center gap-8">
            <motion.div
              initial={{ scale: 0.9, opacity: 0 }}
              animate={{ scale: 1, opacity: 1 }}
-             className="w-20 h-20 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center relative overflow-hidden"
+             className="w-24 h-24 rounded-3xl bg-secondary/50 border border-white/5 flex items-center justify-center relative shadow-2xl"
            >
-              <Zap className="w-10 h-10 text-white fill-white" />
+              <Zap className="w-12 h-12 text-white fill-white shadow-[0_0_30px_rgba(255,255,255,0.3)]" />
               
               <motion.div 
-                 animate={{ rotate: 360 }}
-                 transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
-                 className="absolute inset-0 border border-dashed border-white/20 rounded-2xl"
+                 animate={{ rotate: 360, scale: [1, 1.05, 1] }}
+                 transition={{ rotate: { duration: 4, repeat: Infinity, ease: "linear" }, scale: { duration: 2, repeat: Infinity } }}
+                 className="absolute -inset-4 border border-dashed border-accent/20 rounded-full"
+              />
+              <motion.div 
+                 animate={{ rotate: -360 }}
+                 transition={{ duration: 6, repeat: Infinity, ease: "linear" }}
+                 className="absolute -inset-8 border border-dotted border-accent/10 rounded-full"
               />
            </motion.div>
            
-           <div className="text-center space-y-2">
-              <h2 className="font-mono text-[8px] font-black uppercase tracking-[0.5em] text-white/20">
-                FORGE OS // V3_STABLE
-              </h2>
+           <div className="text-center space-y-4">
+              <div className="flex flex-col items-center gap-1">
+                <h2 className="font-mono text-[9px] font-black uppercase tracking-[0.6em] text-accent/60">
+                  FORGE OS // V3_STABLE
+                </h2>
+                <div className="w-12 h-[1px] bg-accent/20" />
+              </div>
               <div className="h-6 flex items-center justify-center">
                  <AnimatePresence mode="wait">
                    <motion.p
                      key={phaseIndex}
-                     initial={{ opacity: 0, y: 5 }}
-                     animate={{ opacity: 1, y: 0 }}
-                     exit={{ opacity: 0, y: -5 }}
-                     className="text-[9px] font-mono font-bold uppercase tracking-[0.4em] text-white"
+                     initial={{ opacity: 0, y: 10, filter: 'blur(5px)' }}
+                     animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
+                     exit={{ opacity: 0, y: -10, filter: 'blur(5px)' }}
+                     transition={{ duration: 0.4 }}
+                     className="text-[10px] font-mono font-bold uppercase tracking-[0.5em] text-white"
                    >
                      {LOADING_PHASES[phaseIndex].text}
                    </motion.p>
@@ -84,36 +103,51 @@ export default function LoadingScreen({ onComplete }) {
            </div>
         </div>
 
-        {/* Technical Progress Bar */}
-        <div className="space-y-4">
-           <div className="relative h-[1px] w-full bg-white/5 overflow-hidden">
+        {/* Technical Progress Section */}
+        <div className="space-y-6">
+           <div className="relative h-[2px] w-full bg-white/5 rounded-full overflow-hidden">
               <motion.div
-                className="absolute top-0 left-0 h-full bg-white"
+                className="absolute top-0 left-0 h-full bg-accent shadow-[0_0_15px_#22C55E]"
                 style={{ width: `${progress}%` }}
+              />
+              <motion.div 
+                 animate={{ x: ['-100%', '200%'] }}
+                 transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
+                 className="absolute top-0 left-0 w-1/3 h-full bg-gradient-to-r from-transparent via-white/40 to-transparent"
               />
            </div>
 
-           <div className="flex justify-between items-center text-[7px] font-mono font-black uppercase tracking-[0.4em] text-white/10">
-              <span className="flex items-center gap-2">
-                 <div className="w-1 h-1 rounded-full bg-white animate-pulse" />
+           <div className="flex justify-between items-center text-[8px] font-mono font-black uppercase tracking-[0.5em]">
+              <span className="flex items-center gap-3 text-white/20">
+                 <div className="w-1.5 h-1.5 rounded-full bg-accent animate-pulse shadow-[0_0_8px_#22C55E]" />
                  UPTIME_STABLE_V3
               </span>
-              <span className="text-white/40 tabular-nums">{Math.round(progress)}%_SYNCED</span>
+              <span className="text-accent tabular-nums flex items-center gap-2">
+                {Math.round(progress)}% <span className="text-white/20">_SYNCED</span>
+              </span>
            </div>
         </div>
       </div>
 
-      {/* Background Stats HUD */}
-      <div className="absolute bottom-12 inset-x-12 flex justify-between items-end opacity-10 font-mono text-[7px] text-white pointer-events-none uppercase tracking-widest leading-relaxed">
-         <div className="space-y-1">
-            <p>LATENCY // 0.00MS</p>
-            <p>THROUGHPUT // 4.5GB/S</p>
-            <p>SHARD // ALPHA_9</p>
+      {/* Cinematic HUD Elements */}
+      <div className="absolute inset-0 pointer-events-none">
+         <div className="absolute top-12 left-12 space-y-2 opacity-20">
+            <div className="w-8 h-8 border-l border-t border-accent/40" />
+            <span className="text-[7px] font-mono text-white tracking-[0.4em] uppercase">SYSTEM_NODE_01</span>
          </div>
-         <div className="text-right space-y-1">
-            <p>REGION // US_EAST_1</p>
-            <p>ENCRYPTION // AES_256</p>
-            <p>LICENSE // VERIFIED_UID</p>
+         <div className="absolute top-12 right-12 flex flex-col items-end space-y-2 opacity-20">
+            <div className="w-8 h-8 border-r border-t border-accent/40" />
+            <span className="text-[7px] font-mono text-white tracking-[0.4em] uppercase">LINK_STATUS_STABLE</span>
+         </div>
+         <div className="absolute bottom-12 left-12 space-y-4 opacity-10 font-mono text-[7px] text-white tracking-[0.4em]">
+            <p>CORE_TEMP // 32°C</p>
+            <p>LATENCY // 0.24MS</p>
+            <p>SHARD // ALPHA_09</p>
+         </div>
+         <div className="absolute bottom-12 right-12 text-right space-y-4 opacity-10 font-mono text-[7px] text-white tracking-[0.4em]">
+            <p>MEMORY // 128.4GB_FREE</p>
+            <p>NETWORK // ENCRYPTED_V6</p>
+            <p>AUTH // VERIFIED_ROOT</p>
          </div>
       </div>
     </motion.div>

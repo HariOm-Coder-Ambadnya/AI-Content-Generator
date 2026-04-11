@@ -1,11 +1,9 @@
 // src/pages/SettingsPage.jsx
-import { useState, useRef } from 'react'
+import { useState } from 'react'
 import { motion } from 'framer-motion'
 import { useAuth } from '../hooks/useAuth'
-import { Key, User, Shield, Info, ExternalLink, Activity, Database, Lock, Globe, Terminal, RefreshCw, Layers, Zap, Command, Cpu } from 'lucide-react'
+import { ExternalLink, RefreshCw, ArrowRight } from 'lucide-react'
 import toast from 'react-hot-toast'
-import gsap from 'gsap'
-import { useGSAP } from '@gsap/react'
 import { fetchFromBackend } from '../lib/api'
 
 export default function SettingsPage() {
@@ -14,26 +12,15 @@ export default function SettingsPage() {
   const [saving, setSaving] = useState(false)
   const [backendStatus, setBackendStatus] = useState(null)
   const [checkingBackend, setCheckingBackend] = useState(false)
-  const containerRef = useRef(null)
-
-  useGSAP(() => {
-     gsap.from('.settings-module', {
-       y: 40,
-       opacity: 0,
-       stagger: 0.1,
-       duration: 1.2,
-       ease: 'expo.out'
-     })
-  }, { scope: containerRef })
 
   const handleSaveKey = () => {
     setSaving(true)
     if (apiKey.trim()) {
       localStorage.setItem('groq_api_key', apiKey.trim())
-      toast.success('Sequence unlocked.')
+      toast.success('Preferences updated.')
     } else {
       localStorage.removeItem('groq_api_key')
-      toast.success('Sequence locked.')
+      toast.success('Key removed.')
     }
     setSaving(false)
   }
@@ -44,157 +31,163 @@ export default function SettingsPage() {
       const data = await fetchFromBackend('/health')
       if (data.status === 'ok') {
         setBackendStatus('online')
-        toast.success('Core synchronized.')
+        toast.success('System linked.')
       } else {
         setBackendStatus('error')
       }
     } catch (err) {
-      console.error(err)
       setBackendStatus('offline')
-      toast.error('Sync failure.')
-    } finally {
-      setCheckingBackend(false)
+      toast.error('Sync failed.')
     }
+    setCheckingBackend(false)
   }
 
   return (
-    <div ref={containerRef} className="w-full min-h-screen bg-black text-white flex flex-col pt-12 pb-32 px-4 md:px-8">
+    <div className="w-full min-h-screen flex flex-col pt-12 pb-32 px-4 md:px-8 relative z-10">
       
-      {/* HUD Header */}
-      <div className="settings-module flex flex-col md:flex-row justify-between items-start md:items-end mb-20 gap-8">
+      {/* Header Architecture */}
+      <header className="flex flex-col md:flex-row justify-between items-start md:items-end mb-20 gap-8">
         <div className="space-y-4">
            <div className="flex items-center gap-4">
-              <div className="w-10 h-[1px] bg-white/20" />
-              <span className="font-mono text-[9px] font-black uppercase tracking-[0.5em] text-white/30">System: CONFIG_HUB</span>
+              <div className="w-8 h-[2px] bg-accent shadow-[0_0_10px_#22C55E]" />
+              <span className="font-sans text-[10px] font-black uppercase tracking-[0.6em] text-accent">System_Preferences</span>
            </div>
-           <h1 className="font-serif text-6xl md:text-8xl tracking-tighter leading-none">
-              Control <span className="text-white/20">System.</span>
+           <h1 className="font-sans font-black text-6xl md:text-9xl tracking-tighter leading-[0.85] uppercase">
+              Engine <br /> <span className="text-accent">Tuning.</span>
            </h1>
         </div>
 
-        <div className="flex items-center gap-12 md:gap-20 font-mono text-[8px] text-white/20 uppercase tracking-[0.5em]">
-           <div className="flex flex-col gap-1">
+        <div className="flex items-center gap-12 md:gap-20 font-sans text-[9px] text-white/20 uppercase tracking-[0.5em]">
+           <div className="flex flex-col gap-1 text-right">
               <span>Status</span>
-              <span className={backendStatus === 'online' ? 'text-green-500' : 'text-white'}>{backendStatus?.toUpperCase() || 'UNLINKED'}</span>
-           </div>
-           <div className="flex flex-col gap-1">
-              <span>Identity</span>
-              <span className="text-accent-orange">Verified</span>
+              <span className={`font-black ${backendStatus === 'online' ? 'text-accent' : 'text-red-500'}`}>
+                {checkingBackend ? 'Syncing...' : backendStatus === 'online' ? 'Synchronized' : 'Offline'}
+              </span>
            </div>
         </div>
-      </div>
+      </header>
 
-      <div className="grid grid-cols-1 xl:grid-cols-12 gap-8">
-        {/* Profile Card */}
-        <div className="settings-module xl:col-span-8 border border-white/5 bg-white/[0.01] rounded-[40px] p-12 relative overflow-hidden group">
-           <div className="flex flex-col md:flex-row items-center gap-12">
-              <div className="relative">
-                 <div className="absolute inset-0 bg-white/10 blur-3xl rounded-full" />
-                 <img
-                    src={user?.photoURL || `https://api.dicebear.com/8.x/initials/svg?seed=${user?.email}`}
-                    alt="avatar"
-                    className="w-40 h-40 rounded-[50px] border border-white/10 relative z-10 grayscale"
-                 />
+      <div className="grid grid-cols-1 xl:grid-cols-12 gap-12">
+        
+        {/* Core Settings */}
+        <div className="xl:col-span-8 space-y-12">
+          
+          {/* Identity Protocol */}
+          <section className="glass-card p-8 md:p-12 space-y-12">
+            <div className="flex items-center gap-4 text-accent/40">
+              <span className="text-[10px] font-black uppercase tracking-[0.3em]">Identity_Nexus</span>
+            </div>
+            
+            <div className="flex flex-col md:flex-row items-center gap-12">
+              <div className="relative group">
+                <div className="absolute -inset-4 bg-accent/20 rounded-full blur-2xl opacity-0 group-hover:opacity-100 transition-opacity" />
+                <img
+                  src={user?.photoURL || `https://api.dicebear.com/8.x/initials/svg?seed=${user?.email}`}
+                  alt="Identity"
+                  className="relative w-32 h-32 rounded-full border-2 border-accent/20 object-cover shadow-2xl"
+                />
               </div>
-              <div className="text-center md:text-left space-y-6">
-                 <div>
-                    <h2 className="font-serif text-5xl text-white tracking-tight">{user?.displayName}</h2>
-                    <p className="font-mono text-sm text-white/20 mt-1">{user?.email}</p>
-                 </div>
-                 <div className="flex flex-wrap justify-center md:justify-start gap-4">
-                    <div className="px-5 py-2 bg-white/5 border border-white/5 rounded-xl text-[9px] font-black uppercase tracking-[0.3em] text-white/40">
-                       ID: {user?.uid?.slice(0, 12).toUpperCase()}
-                    </div>
-                    <div className="px-5 py-2 bg-white text-black border border-white rounded-xl text-[9px] font-black uppercase tracking-[0.3em]">
-                       Auth: Verified
-                    </div>
-                 </div>
+              <div className="space-y-3 text-center md:text-left">
+                <h3 className="text-4xl font-black tracking-tight text-white uppercase">{user?.displayName}</h3>
+                <p className="text-accent text-xs font-black uppercase tracking-widest opacity-60">{user?.email}</p>
+                <div className="pt-4">
+                  <span className="px-6 py-2 bg-white/5 border border-white/10 text-[9px] font-black uppercase tracking-[0.3em] rounded-full">
+                    Partner_Tier: PROTOCOL_01
+                  </span>
+                </div>
               </div>
-           </div>
-        </div>
+            </div>
+          </section>
 
-        {/* Diagnostics Module */}
-        <div className="settings-module xl:col-span-4 space-y-6">
-           <div className="border border-white/5 bg-white/[0.01] rounded-[40px] p-10 flex flex-col justify-between h-full">
-              <div className="space-y-8">
-                 <div className="flex items-center gap-4">
-                    <Activity className={`w-6 h-6 ${backendStatus === 'online' ? 'text-green-500' : 'text-white/20'}`} />
-                    <p className="text-[9px] font-black uppercase tracking-[0.4em] text-white/30">Neural Engine</p>
-                 </div>
-                 <div className="space-y-1">
-                    <p className="font-serif text-3xl">{checkingBackend ? 'Syncing...' : backendStatus === 'online' ? 'Connected' : 'Offline'}</p>
-                    <p className="text-[9px] font-mono text-white/10 uppercase">Registry Response: 200 OK</p>
-                 </div>
+          {/* Integration Protocol */}
+          <section className="glass-card p-8 md:p-12 space-y-12">
+            <div className="flex justify-between items-center">
+              <div className="flex items-center gap-4 text-accent/40">
+                <span className="text-[10px] font-black uppercase tracking-[0.3em]">Processing_Engine</span>
               </div>
-              <button 
-                onClick={checkBackend}
-                disabled={checkingBackend}
-                className="w-full mt-12 py-5 bg-white/5 hover:bg-white/10 border border-white/5 rounded-2xl text-[9px] font-black uppercase tracking-[0.4em] text-white transition-all flex items-center justify-center gap-3 active:scale-95"
+              <a 
+                href="https://console.groq.com/keys" 
+                target="_blank" 
+                rel="noreferrer" 
+                className="flex items-center gap-3 text-[9px] font-black uppercase tracking-[0.2em] text-accent/40 hover:text-accent transition-colors"
               >
-                <RefreshCw className={`w-4 h-4 ${checkingBackend ? 'animate-spin' : ''}`} /> Sync Architecture
-              </button>
-           </div>
-        </div>
-
-        {/* Engine Configuration */}
-        <div className="settings-module xl:col-span-12 border border-white/5 bg-white/[0.01] rounded-[40px] p-12">
-           <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-12 mb-16">
-              <div className="space-y-4">
-                 <div className="flex items-center gap-3">
-                    <Cpu className="w-5 h-5 text-accent-orange" />
-                    <h3 className="text-[10px] font-black uppercase tracking-[0.4em] text-white">Neural Processing Unit</h3>
-                 </div>
-                 <p className="text-white/40 text-lg font-light max-w-2xl leading-relaxed">
-                    Inject your <strong className="text-white">Groq LPU</strong> access token to enable high-speed generation. 
-                    Tokens are strictly held in local sharded storage.
-                 </p>
-              </div>
-              <a href="https://console.groq.com/keys" target="_blank" rel="noreferrer" className="flex items-center gap-3 border border-white/10 px-8 py-4 rounded-xl text-[9px] font-black uppercase tracking-[0.3em] text-white/40 hover:text-white transition-colors">
-                 GET_TOKEN <ExternalLink className="w-3.5 h-3.5" />
+                Provision_Credentials <ExternalLink className="w-3.5 h-3.5" />
               </a>
-           </div>
+            </div>
 
-           <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
-              <div className="md:col-span-9 relative">
-                 <Terminal className="absolute left-6 top-1/2 -translate-y-1/2 w-4 h-4 text-white/20" />
-                 <input
-                    type="password"
-                    className="w-full h-16 bg-white/[0.02] border border-white/5 rounded-2xl px-16 text-white font-mono text-sm focus:outline-none focus:border-white/20 transition-all placeholder:text-white/5"
-                    placeholder="sk-neural_................................"
-                    value={apiKey}
-                    onChange={e => setApiKey(e.target.value)}
-                 />
+            <div className="space-y-8">
+              <p className="text-white/40 text-sm font-medium leading-relaxed max-w-xl">
+                Enter your GROQ_API_KEY to bridge the neural lattice and enable high-velocity generation.
+              </p>
+              
+              <div className="relative">
+                <input
+                  type="password"
+                  className="w-full bg-secondary/50 border border-white/5 rounded-2xl py-8 px-10 text-xl font-mono text-accent focus:outline-none focus:border-accent/40 transition-all placeholder:text-white/5"
+                  placeholder="X-XXXXXXXXXXXXXXXXX..."
+                  value={apiKey}
+                  onChange={e => setApiKey(e.target.value)}
+                />
+                
+                <div className="flex justify-end pt-8">
+                  <button 
+                    onClick={handleSaveKey}
+                    disabled={saving}
+                    className="group relative px-12 py-5 bg-accent text-black font-black uppercase tracking-[0.2em] text-[10px] overflow-hidden transition-all hover:bg-white active:scale-95 disabled:opacity-50"
+                  >
+                    <span className="relative z-10 flex items-center gap-4">
+                      {saving ? 'Updating_Core...' : 'Synchronize Preferences'}
+                      <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-2" />
+                    </span>
+                  </button>
+                </div>
               </div>
-              <button 
-                onClick={handleSaveKey}
-                disabled={saving}
-                className="md:col-span-3 h-16 bg-white text-black rounded-2xl text-[10px] font-black uppercase tracking-[0.5em] hover:scale-[1.02] active:scale-[0.98] transition-all"
-              >
-                 {saving ? 'UPDATING...' : 'SYNC_ENGINE'}
-              </button>
-           </div>
-
-           <div className="mt-8 flex items-center gap-3 text-white/10 font-mono text-[8px] uppercase tracking-[0.4em]">
-              <Lock className="w-3 h-3" /> Encrypted Local Protocol Active
-           </div>
+            </div>
+          </section>
         </div>
 
-        {/* System Matrix */}
-        <div className="settings-module xl:col-span-12 grid grid-cols-1 md:grid-cols-2 gap-1 px-0 overflow-hidden rounded-[40px] border border-white/5">
-           <div className="p-12 bg-white/[0.01]">
-              <h4 className="text-[10px] font-black uppercase tracking-[0.4em] text-white mb-4">Zero Knowledge</h4>
-              <p className="text-white/20 text-sm leading-relaxed font-mono">
-                 All neural blueprints are partitioned across isolated memory shards. Forge never sees your data.
-              </p>
-           </div>
-           <div className="p-12 bg-white/[0.02]">
-              <h4 className="text-[10px] font-black uppercase tracking-[0.4em] text-white mb-4">Compliance</h4>
-              <p className="text-white/20 text-sm leading-relaxed font-mono">
-                 SOC2 compliant infrastructure. Hardware-level security keys supported for all enterprise-tier clusters.
-              </p>
-           </div>
-        </div>
+        {/* Diagnostic Sidebar */}
+        <aside className="xl:col-span-4 space-y-12">
+          <section className="glass-card p-10 space-y-10 relative overflow-hidden">
+            <div className="absolute top-[-20px] right-[-20px] opacity-[0.02]">
+              <RefreshCw className="w-32 h-32" />
+            </div>
+
+            <div className="space-y-8 relative z-10">
+               <span className="text-[10px] font-black uppercase tracking-[0.4em] text-white/20">System_Health</span>
+               
+               <div className="space-y-2">
+                  <p className="text-4xl font-black text-white uppercase tracking-tighter">
+                    {checkingBackend ? 'Syncing' : backendStatus === 'online' ? 'Linked' : 'Dormant'}
+                  </p>
+                  <div className="flex items-center gap-3">
+                     <div className={`w-2 h-2 rounded-full ${backendStatus === 'online' ? 'bg-accent animate-pulse shadow-[0_0_10px_#22C55E]' : 'bg-red-500/20'}`} />
+                     <span className="text-[9px] font-black uppercase tracking-widest text-white/40">Neural Link Diagnostics</span>
+                  </div>
+               </div>
+
+               <button 
+                 onClick={checkBackend}
+                 disabled={checkingBackend}
+                 className="w-full py-5 rounded-xl border border-white/5 bg-white/5 text-[10px] font-black uppercase tracking-[0.4em] hover:bg-accent hover:text-black hover:border-accent transition-all flex items-center justify-center gap-4 active:scale-95"
+               >
+                 <RefreshCw className={`w-4 h-4 ${checkingBackend ? 'animate-spin' : ''}`} /> 
+                 Verify Integrity
+               </button>
+            </div>
+          </section>
+
+          <section className="px-6 space-y-6">
+            <span className="text-[10px] font-black uppercase tracking-[0.4em] text-accent opacity-40">Privacy_Protocol</span>
+            <p className="text-xs text-white/30 font-medium leading-relaxed uppercase tracking-wider">
+              All credentials are encrypted and localized. We operate on a sub-zero knowledge architecture.
+            </p>
+          </section>
+        </aside>
+
       </div>
     </div>
   )
 }
+
+

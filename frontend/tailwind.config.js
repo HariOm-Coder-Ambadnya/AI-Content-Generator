@@ -10,11 +10,13 @@ export default {
         mono: ['"JetBrains Mono"', 'monospace'],
       },
       colors: {
-        black: '#000000',
-        white: '#FFFFFF',
-        'bg-deep': '#000000',
-        'accent-orange': '#FFFFFF', // Replaced orange with white for pure B&W engineering
-        'text-dim': '#888888',
+        primary: "#0D1117",
+        secondary: "#161B22",
+        accent: "#22C55E",
+        'accent-glow': "#4ADE80",
+        surface: "#1F2937",
+        white: "#ffffff",
+        gray: "#8B949E",
       },
       borderRadius: {
         xl: '12px',

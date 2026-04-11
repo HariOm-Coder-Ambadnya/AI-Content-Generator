@@ -1,6 +1,6 @@
 // src/pages/GeneratePage.jsx
 import { useState, useCallback, useRef } from 'react'
-import { Sparkles, StopCircle, Wand2, Zap, Target, Layers, Cpu, Bookmark, Share2, CornerRightDown, Fingerprint, Activity, Box, Terminal, Database, Command } from 'lucide-react'
+import { Plus, StopCircle, Terminal, ArrowRight, MousePointer2, Clock, BookOpen, Cpu } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { streamGenerateContent } from '../lib/groq'
 import { saveGeneration } from '../lib/firestore'
@@ -8,8 +8,6 @@ import { useAuth } from '../hooks/useAuth'
 import { CONTENT_TYPES } from '../components/ContentTypeCard'
 import OutputPanel from '../components/OutputPanel'
 import toast from 'react-hot-toast'
-import gsap from 'gsap'
-import { useGSAP } from '@gsap/react'
 
 const TONES = [
   { id: 'professional', label: 'Professional' },
@@ -18,49 +16,29 @@ const TONES = [
   { id: 'inspirational', label: 'Inspirational' },
 ]
 
-const LENGTHS = [
-  { id: 'short', label: 'Short', hint: '~200 words' },
-  { id: 'medium', label: 'Medium', hint: '~500 words' },
-  { id: 'long', label: 'Long', hint: '~1000 words' },
-]
-
 export default function GeneratePage() {
   const user = useAuth()
   const [contentType, setContentType] = useState('blog')
   const [topic, setTopic] = useState('')
   const [tone, setTone] = useState('professional')
-  const [length, setLength] = useState('medium')
-  const [audience, setAudience] = useState('')
-  const [additionalContext, setAdditionalContext] = useState('')
   
   const [output, setOutput] = useState('')
   const [isGenerating, setIsGenerating] = useState(false)
   const [isSaving, setIsSaving] = useState(false)
 
   const abortControllerRef = useRef(null)
-  const containerRef = useRef(null)
-
-  useGSAP(() => {
-    gsap.from('.reveal-item', {
-      y: 40,
-      opacity: 0,
-      stagger: 0.1,
-      duration: 1.2,
-      ease: 'expo.out'
-    })
-  }, { scope: containerRef })
 
   const handleStop = () => {
     if (abortControllerRef.current) {
       abortControllerRef.current.abort()
       setIsGenerating(false)
-      toast.error('Neural transmission interrupted.')
+      toast.error('Session interrupted.')
     }
   }
 
   const handleGenerate = useCallback(async () => {
     if (!topic.trim()) {
-      toast.error('Project briefing required.')
+      toast.error('Briefing required.')
       return
     }
 
@@ -75,9 +53,9 @@ export default function GeneratePage() {
         type: contentType,
         topic,
         tone,
-        length,
-        audience,
-        additionalContext,
+        length: 'medium',
+        audience: '',
+        additionalContext: '',
         signal: controller.signal
       })
 
@@ -86,12 +64,12 @@ export default function GeneratePage() {
       }
     } catch (err) {
       if (err.name === 'AbortError') return
-      toast.error(err.message || 'Quantum processing failed.')
+      toast.error(err.message || 'Generation failed.')
     } finally {
       setIsGenerating(false)
       abortControllerRef.current = null
     }
-  }, [contentType, topic, tone, length, audience, additionalContext])
+  }, [contentType, topic, tone])
 
   const handleSave = async () => {
     if (!output || !user) return
@@ -101,170 +79,174 @@ export default function GeneratePage() {
         contentType,
         topic,
         tone,
-        length,
-        audience,
+        length: 'medium',
         output,
         wordCount: output.split(/\s+/).filter(Boolean).length,
       })
-      toast.success('Archived to Cloud Memory')
+      toast.success('Archived successfully')
     } catch (err) {
-      toast.error('Vault synchronization failed.')
+      toast.error('Archive failed.')
     } finally {
       setIsSaving(false)
     }
   }
 
+  const wordCount = output.split(/\s+/).filter(Boolean).length
+  const estReadingTime = Math.ceil(wordCount / 200)
+
   return (
-    <div ref={containerRef} className="w-full min-h-screen bg-black text-white flex flex-col pt-24 lg:pt-12 pb-32 lg:pb-12 px-6 md:px-12 lg:pl-32">
-      
-      {/* HUD Header */}
-      <div className="reveal-item flex flex-col md:flex-row justify-between items-start md:items-end mb-20 gap-8">
-        <div className="space-y-4">
-           <div className="flex items-center gap-4">
-              <div className="w-10 h-[1px] bg-white/20" />
-              <span className="font-mono text-[9px] font-black uppercase tracking-[0.5em] text-white/30">Node_ID: US-EAST-1</span>
-           </div>
-           <h1 className="font-serif text-4xl md:text-8xl tracking-tighter leading-none">
-              Architect <span className="text-white/20">Content.</span>
-           </h1>
-        </div>
+    <div className="w-full min-h-screen flex flex-col pt-32 pb-20 px-6 md:px-12 lg:pl-[140px] relative">
+      <div className="noise-bg" />
+      <div className="grid-background opacity-[0.015]" />
+      <div className="border-frame" />
 
-        <div className="flex items-center gap-12 md:gap-20 font-mono text-[8px] text-white/20 uppercase tracking-[0.5em]">
-           <div className="flex flex-col gap-1">
-              <span>Status</span>
-              <span className="text-white">Online</span>
-           </div>
-           <div className="flex flex-col gap-1">
-              <span>Latency</span>
-              <span className="text-white">12ms</span>
-           </div>
+      <header className="mb-24 space-y-4 relative z-10">
+        <div className="flex items-center gap-4 opacity-40 mb-8">
+           <Terminal className="w-4 h-4 text-accent" />
+           <span className="text-[9px] font-sans font-black uppercase tracking-[0.5em] text-accent">Influence_Generation_Protocol // v2.1.0</span>
         </div>
-      </div>
+        <h1 className="font-sans font-black text-6xl md:text-9xl tracking-tighter leading-none uppercase">
+          Forge <span className="text-accent opacity-100">Content.</span>
+        </h1>
+        <p className="text-gray font-mono text-sm max-w-2xl opacity-40 uppercase tracking-widest mt-6">Synthesize high-velocity narratives for algorithmic dominance.</p>
+      </header>
 
-      <div className="grid grid-cols-1 xl:grid-cols-12 gap-12">
+      <div className="grid grid-cols-1 xl:grid-cols-12 gap-0 relative z-10 border border-white/5 bg-secondary/30 backdrop-blur-3xl shadow-2xl overflow-hidden rounded-3xl">
         
-        {/* SIDEBAR CONFIG (3 cols) */}
-        <aside className="xl:col-span-3 space-y-12 reveal-item">
-           
-           {/* Archetype */}
-           <section className="space-y-6">
-              <div className="flex items-center gap-3 text-white/20">
-                 <Terminal className="w-3.5 h-3.5" />
-                 <h2 className="font-mono text-[9px] font-black uppercase tracking-[0.5em]">Archetype</h2>
+        {/* Configuration Sidebar */}
+        <aside className="xl:col-span-3 border-r border-white/5 p-12 space-y-16 bg-[#0D1117]/50">
+           <section className="space-y-10">
+              <div className="flex items-center gap-4">
+                 <div className="w-2 h-2 bg-accent rounded-full shadow-[0_0_10px_#22C55E]" />
+                 <h2 className="text-[10px] font-sans font-black uppercase tracking-[0.4em] text-accent">Medium_Selection</h2>
               </div>
-              <div className="flex flex-col gap-2">
+              <div className="flex flex-col gap-1">
                  {CONTENT_TYPES.map(type => (
                     <button
                        key={type.id}
                        onClick={() => setContentType(type.id)}
-                       className={`w-full text-left px-5 py-4 rounded-xl font-mono text-[9px] font-black uppercase tracking-[0.2em] transition-all border ${
+                       className={`group relative text-left py-4 transition-all duration-500 hover:pl-2 ${
                           contentType === type.id 
-                          ? 'bg-white text-black border-white shadow-[0_0_20px_rgba(255,255,255,0.05)]' 
-                          : 'bg-white/5 border-white/5 text-white/40 hover:bg-white/10'
+                          ? 'text-accent' 
+                          : 'text-gray opacity-30 hover:opacity-100'
                        }`}
                     >
-                       {type.label}
+                       <span className="text-[11px] font-sans font-black uppercase tracking-[0.2em]">{type.label}</span>
+                       {contentType === type.id && (
+                          <motion.div layoutId="type-dot" className="absolute left-[-20px] top-1/2 -translate-y-1/2 w-1.5 h-1.5 bg-accent rounded-full shadow-[0_0_8px_#22C55E]" />
+                       )}
                     </button>
                  ))}
               </div>
            </section>
 
-           {/* Tone */}
-           <section className="space-y-6">
-              <div className="flex items-center gap-3 text-white/20">
-                 <Target className="w-3.5 h-3.5" />
-                 <h2 className="font-mono text-[9px] font-black uppercase tracking-[0.5em]">Tone_Logic</h2>
+           <section className="space-y-10">
+              <div className="flex items-center gap-4">
+                 <div className="w-2 h-2 border border-accent rounded-full" />
+                 <h2 className="text-[10px] font-sans font-black uppercase tracking-[0.4em] opacity-40">Voice_Tone</h2>
               </div>
-              <div className="flex flex-col gap-2">
+              <div className="flex flex-col gap-1">
                  {TONES.map(t => (
                     <button
                        key={t.id}
                        onClick={() => setTone(t.id)}
-                       className={`w-full text-left px-5 py-4 rounded-xl font-mono text-[9px] font-black uppercase tracking-[0.2em] transition-all border ${
+                       className={`group relative text-left py-4 transition-all duration-500 hover:pl-2 ${
                           tone === t.id 
-                          ? 'bg-white text-black border-white shadow-[0_0_20px_rgba(255,255,255,0.05)]' 
-                          : 'bg-white/5 border-white/5 text-white/40 hover:bg-white/10'
+                          ? 'text-accent' 
+                          : 'text-gray opacity-30 hover:opacity-100'
                        }`}
                     >
-                       {t.label}
+                       <span className="text-[11px] font-sans font-black uppercase tracking-[0.2em]">{t.label}</span>
+                       {tone === t.id && (
+                          <motion.div layoutId="tone-dot" className="absolute left-[-20px] top-1/2 -translate-y-1/2 w-1.5 h-1.5 bg-accent rounded-full shadow-[0_0_8px_#22C55E]" />
+                       )}
                     </button>
                  ))}
               </div>
            </section>
 
-           {/* Length */}
-           <section className="space-y-6">
-              <div className="flex items-center gap-3 text-white/20">
-                 <Layers className="w-3.5 h-3.5" />
-                 <h2 className="font-mono text-[9px] font-black uppercase tracking-[0.5em]">Span_Module</h2>
+           <section className="pt-12 border-t border-white/5 space-y-10">
+              <div className="flex items-center gap-4">
+                 <Cpu className="w-3.5 h-3.5 opacity-20" />
+                 <h2 className="text-[10px] font-sans font-black uppercase tracking-[0.4em] opacity-40">Telemetry</h2>
               </div>
-              <div className="flex flex-col gap-2">
-                 {LENGTHS.map(l => (
-                    <button
-                       key={l.id}
-                       onClick={() => setLength(l.id)}
-                       className={`w-full text-left px-5 py-4 rounded-xl font-mono text-[9px] font-black uppercase tracking-[0.2em] transition-all border ${
-                          length === l.id 
-                          ? 'bg-white text-black border-white shadow-[0_0_20px_rgba(255,255,255,0.05)]' 
-                          : 'bg-white/5 border-white/5 text-white/40 hover:bg-white/10'
-                       }`}
-                    >
-                       {l.label}
-                    </button>
-                 ))}
+              <div className="space-y-6">
+                 <div className="flex items-center gap-4 opacity-20">
+                    <Clock className="w-3.5 h-3.5" />
+                    <span className="text-[9px] font-sans font-black uppercase tracking-[0.2em]">{estReadingTime} MIN_READ</span>
+                 </div>
+                 <div className="flex items-center gap-4 opacity-20">
+                    <BookOpen className="w-3.5 h-3.5" />
+                    <span className="text-[9px] font-sans font-black uppercase tracking-[0.2em]">{wordCount} UNIT_STREAM</span>
+                 </div>
+                 <div className="flex items-center gap-4 text-accent/40">
+                    <MousePointer2 className="w-3.5 h-3.5" />
+                    <span className="text-[9px] font-sans font-black uppercase tracking-[0.2em]">LIVE_SYNAPSE</span>
+                 </div>
               </div>
            </section>
-
         </aside>
 
-        {/* MAIN WORKSPACE (9 cols) */}
-        <main className="xl:col-span-9 space-y-12">
-            
-            {/* Briefing Area */}
-            <section className="reveal-item space-y-6">
-               <div className="flex items-center gap-3 text-white/20">
-                  <Database className="w-3.5 h-3.5" />
-                  <h2 className="font-mono text-[9px] font-black uppercase tracking-[0.5em]">System_Briefing</h2>
+        {/* Workspace Main */}
+        <main className="xl:col-span-9 p-12 md:p-20 flex flex-col gap-32 bg-secondary/20">
+            <section className="space-y-12">
+               <div className="flex items-center gap-4">
+                  <div className="w-8 h-[1px] bg-accent opacity-30" />
+                  <h2 className="text-[10px] font-sans font-black uppercase tracking-[0.5em] text-accent opacity-60">Objective_Input</h2>
                </div>
                <div className="relative">
                   <textarea
-                    className="w-full min-h-[240px] bg-white/[0.03] border border-white/5 rounded-[40px] p-10 text-2xl font-light text-white focus:outline-none focus:border-white/10 transition-all placeholder:text-white/5"
-                    placeholder="Input protocol parameters..."
-                    value={topic}
-                    onChange={e => setTopic(e.target.value)}
+                     className="w-full bg-transparent py-8 min-h-[150px] text-4xl md:text-6xl font-black tracking-tighter text-white focus:outline-none focus:text-accent transition-all resize-none placeholder:opacity-5 border-none"
+                     placeholder="Define_The_Topic..."
+                     value={topic}
+                     onChange={e => setTopic(e.target.value)}
+                     disabled={isGenerating}
                   />
-                  <div className="absolute bottom-10 right-12 flex items-center gap-4">
-                     {isGenerating ? (
-                        <button onClick={handleStop} className="flex items-center gap-3 font-mono text-[9px] font-black uppercase tracking-[0.3em] text-red-500 bg-red-500/5 px-6 py-3 rounded-xl border border-red-500/20 hover:bg-red-500/10 transition-all">
-                           <StopCircle className="w-4 h-4" /> Abort_Sequence
-                        </button>
-                     ) : (
-                        <button 
-                           onClick={handleGenerate}
-                           disabled={!topic.trim()}
-                           className="flex items-center gap-3 font-mono text-[9px] font-black uppercase tracking-[0.3em] text-black bg-white px-10 py-5 rounded-2xl hover:scale-105 transition-all shadow-[0_20px_40px_rgba(255,255,255,0.1)] disabled:opacity-20"
-                        >
-                           <Zap className="w-4 h-4" /> Forge_Sequence
-                        </button>
-                     )}
+                  <div className="mt-12 flex items-center justify-between border-t border-white/5 pt-12">
+                     <div className="flex items-center gap-10">
+                        {isGenerating && (
+                           <div className="flex items-center gap-2">
+                              <span className="w-1.5 h-1.5 bg-accent rounded-full animate-bounce" />
+                              <span className="w-1.5 h-1.5 bg-accent rounded-full animate-bounce delay-100" />
+                              <span className="w-1.5 h-1.5 bg-accent rounded-full animate-bounce delay-200" />
+                           </div>
+                        )}
+                        <span className="text-[9px] font-sans font-black uppercase tracking-[0.4em] opacity-30">Secure_Neural_Link</span>
+                     </div>
+
+                     <div className="overflow-hidden">
+                        {isGenerating ? (
+                           <button 
+                              onClick={handleStop}
+                              className="px-10 py-5 bg-red-500/10 text-red-500 text-[11px] font-black uppercase tracking-[0.3em] flex items-center gap-4 hover:bg-red-500 hover:text-white transition-all group rounded-xl"
+                           >
+                              Terminate 
+                              <StopCircle className="w-4 h-4 animate-pulse" />
+                           </button>
+                        ) : (
+                           <button 
+                              onClick={handleGenerate}
+                              disabled={!topic.trim() || isGenerating}
+                              className="px-10 py-5 bg-accent text-black text-[11px] font-black uppercase tracking-[0.3em] flex items-center gap-4 disabled:opacity-5 hover:bg-white transition-all group rounded-xl shadow-[0_0_30px_rgba(34,197,94,0.2)]"
+                           >
+                              Forge Influence 
+                              <ArrowRight className="w-4 h-4 transition-transform duration-500 group-hover:translate-x-2" />
+                           </button>
+                        )}
+                     </div>
                   </div>
                </div>
             </section>
 
-            {/* Output Panel / Generated Content */}
-            <section className="reveal-item space-y-8 min-h-[500px]">
-               <div className="flex items-center gap-3 text-white/20">
-                  <Command className="w-3.5 h-3.5" />
-                  <h2 className="font-mono text-[9px] font-black uppercase tracking-[0.5em]">Output_Buffer</h2>
-               </div>
-               
+            <section className="min-h-[500px]">
                <AnimatePresence mode="wait">
                   {output || isGenerating ? (
                      <motion.div
                         key="output"
-                        initial={{ opacity: 0, y: 20 }}
+                        initial={{ opacity: 0, y: 40 }}
                         animate={{ opacity: 1, y: 0 }}
-                        className="w-full"
+                        transition={{ duration: 1, ease: [0.23, 1, 0.32, 1] }}
+                        className="w-full p-8 md:p-16 bg-[#0D1117]/80 backdrop-blur-xl border border-white/5 rounded-3xl shadow-2xl"
                      >
                         <OutputPanel
                            content={output}
@@ -273,25 +255,11 @@ export default function GeneratePage() {
                            onSave={handleSave}
                            isSaving={isSaving}
                         />
-                        
-                        {/* Technical Meta Footer */}
-                        <div className="mt-8 flex justify-between items-center font-mono text-[8px] text-white/10 uppercase tracking-[0.4em] px-8">
-                           <div className="flex items-center gap-4">
-                              <span className={`w-1.5 h-1.5 rounded-full ${isGenerating ? 'bg-white animate-pulse' : 'bg-white/20'}`} />
-                              {isGenerating ? 'STREAMING_ENCODED_DATA' : 'STREAMS_STABLE'}
-                           </div>
-                           <div className="flex gap-12">
-                              <span>CHKSUM: {Math.random().toString(36).substring(7).toUpperCase()}</span>
-                              <span>TYPE: {contentType.toUpperCase()}</span>
-                           </div>
-                        </div>
                      </motion.div>
                   ) : (
-                     <div key="placeholder" className="w-full h-96 flex flex-col items-center justify-center border border-white/5 rounded-[48px] bg-white/[0.01]">
-                        <div className="w-16 h-16 rounded-full border border-white/5 flex items-center justify-center mb-8 opacity-20">
-                           <Wand2 className="w-6 h-6" />
-                        </div>
-                        <p className="font-mono text-[9px] font-black uppercase tracking-[0.6em] text-white/10">Awaiting_Neural_Ping</p>
+                     <div key="placeholder" className="w-full h-96 flex flex-col items-center justify-center border border-dashed border-white/5 rounded-3xl opacity-20 transition-all hover:opacity-40 hover:bg-white/[0.02] group">
+                        <Plus className="w-12 h-12 mb-8 stroke-[1px] transition-transform group-hover:rotate-90" />
+                        <p className="text-[12px] font-sans font-black uppercase tracking-[1em]">Awaiting_Synthesis</p>
                      </div>
                   )}
                </AnimatePresence>
@@ -302,3 +270,6 @@ export default function GeneratePage() {
     </div>
   )
 }
+
+
+
